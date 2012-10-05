@@ -1,0 +1,22 @@
+#!/usr/bin/env ruby
+require 'optparse'
+require File.expand_path('lib/metrics', File.dirname(__FILE__))
+require 'dm-migrations'
+require 'date'
+require 'fileutils'
+
+ENV['METRICS_CMD'] = '1'
+
+module Metrics
+  class Command
+  end
+end
+
+ARGV.options do |o|
+  cmd = Metrics::Command.new
+  o.set_summary_indent('  ')
+  o.banner = "Usage: #{File.basename($0)} [OPTION]"
+  o.on('-h', '--help', 'show this help message') { puts o; exit }
+  o.parse!
+  puts o
+end

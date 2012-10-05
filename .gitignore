@@ -1,0 +1,4 @@
+*.swp
+*.gem
+Gemfile.lock
+*.sqlite3
