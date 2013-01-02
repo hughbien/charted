@@ -34,7 +34,7 @@ Stick this in your `bashrc` or `zshrc`:
 The app should be mounted to `/metrics` path on your domain.  Then in your app,
 include the script right before the closing `</body>` tag:
 
-    <script src="/metrics.js" async></script>
+    <script src="/metrics/?js" async></script>
 
 Updating
 ========
@@ -58,7 +58,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* handle environments (dev, test, prod)
 * add logging for prod environment
 * add emailing exceptions for prod environment
 * write/get cookies to distinguish between unique visitors

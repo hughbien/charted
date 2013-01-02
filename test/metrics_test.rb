@@ -29,6 +29,7 @@ class MetricsTest < MiniTest::Unit::TestCase
       c.db_username 'root'
       c.db_password 'secret'
       c.db_database 'db.sqlite3'
+      c.environment :test
       c.sites       ['localhost']
     end
     Pony.mail(nil)
@@ -50,6 +51,7 @@ class ConfigTest < MetricsTest
     assert_equal('root', Metrics.config.db_username)
     assert_equal('secret', Metrics.config.db_password)
     assert_equal('db.sqlite3', Metrics.config.db_database)
+    assert_equal(:test, Metrics.config.environment)
     assert_equal(['localhost'], Metrics.config.sites)
   end
 end
@@ -76,8 +78,12 @@ class AppTest < MetricsTest
   include Rack::Test::Methods
 
   def test_metrics_js
-    get '/metrics.js'
+    get '/?js'
     assert last_response.ok?
+  end
+
+  def test_environment
+    assert_equal :test, Metrics::App.environment
   end
 
   private

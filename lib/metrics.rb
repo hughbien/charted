@@ -33,14 +33,23 @@ module Metrics
       names.each do |name|
         define_method(name) do |*args|
           value = args[0]
-          instance_variable_set("@#{name}".to_sym, value) if !value.nil?
+          if !value.nil?
+            instance_variable_set("@#{name}".to_sym, value)
+            if self.class.respond_to?(:"after_#{name}")
+              self.class.send(:"after_#{name}", value)
+            end
+          end
           instance_variable_get("@#{name}".to_sym)
         end
       end
     end
 
-    attr_option :email, :logging, :delete_after, :sites,
+    attr_option :email, :logging, :delete_after, :sites, :environment,
                 :db_adapter, :db_host, :db_username, :db_password, :db_database
+
+    def self.after_environment(value)
+      Metrics::App.set :environment, value
+    end
   end
 
   class Site
@@ -63,11 +72,13 @@ module Metrics
   DataMapper.finalize
 
   class App < Sinatra::Base
+    set :dump_errors, true
     set :raise_errors, false
     set :show_exceptions, false
     set :logging, true
+    set :environment, :production
 
-    get '/metrics.js' do
+    get '/' do
       'OK'
     end
 
