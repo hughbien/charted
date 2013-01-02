@@ -39,8 +39,25 @@ module Metrics
       end
     end
 
-    attr_option :email, :logs, :delete_after, :sites,
+    attr_option :email, :logging, :delete_after, :sites,
                 :db_adapter, :db_host, :db_username, :db_password, :db_database
+  end
+
+  class Site
+    include DataMapper::Resource
+
+    property :id,     Serial
+    property :domain, String, :required => true, :unique => true
+
+    has n, :visits
+  end
+
+  class Visit
+    include DataMapper::Resource
+
+    property :id, Serial
+
+    belongs_to :site, :key => true
   end
 
   DataMapper.finalize
@@ -48,6 +65,11 @@ module Metrics
   class App < Sinatra::Base
     set :raise_errors, false
     set :show_exceptions, false
+    set :logging, true
+
+    get '/metrics.js' do
+      'OK'
+    end
 
     error do
       Pony.mail(

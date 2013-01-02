@@ -15,14 +15,14 @@ Setup a `config.ru` file and run it like any other Sinatra application.
 
     Metrics.configure do |c|
       c.email        'john@mailinator.com'      # production exceptions are sent here
-      c.logs         '/path/to/production.log'
+      c.logging      '/path/to/production.log'
       c.delete_after 365                        # only keep a years worth of data
       c.db_adapter   'mysql'
       c.db_host      'localhost'
       c.db_username  'root'
       c.db_password  'secret'
       c.db_database  'metrics'
-      c.sites        ['hughbien.com', 'bucklepack.com']
+      c.sites        ['hughbien.com', 'example.com']
     end
 
     run Metrics::App if !ENV['METRICS_CMD']
@@ -53,8 +53,28 @@ the included command line application.
 Development
 ===========
 
-Tests are setup to run individually via `ruby test/*_test.rb` or run them all
-via `rake`.
+Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
+
+TODO
+====
+
+* handle environments (dev, test, prod)
+* add logging for prod environment
+* add emailing exceptions for prod environment
+* write/get cookies to distinguish between unique visitors
+* track visits (total + unique)
+* track pages (total + unique)
+* track referrers (total + unique)
+* track browsers, OS, scren size (unique only)
+* track searches/found (total + unique)
+* add CLI for pulling stats out
+* add event tracking
+* add funnel conversion tracking
+* add AB testing
+* add stats summary for AB tests
+* add deletion via CLI
+* add deletion every N days for fresh data
+* add syncing for local dashboard
 
 License
 =======
