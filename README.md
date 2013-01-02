@@ -15,7 +15,6 @@ Setup a `config.ru` file and run it like any other Sinatra application.
 
     Metrics.configure do |c|
       c.email        'john@mailinator.com'      # production exceptions are sent here
-      c.logging      '/path/to/production.log'
       c.delete_after 365                        # only keep a years worth of data
       c.db_adapter   'mysql'
       c.db_host      'localhost'
@@ -58,8 +57,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* add logging for prod environment
-* add emailing exceptions for prod environment
 * write/get cookies to distinguish between unique visitors
 * track visits (total + unique)
 * track pages (total + unique)

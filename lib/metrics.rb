@@ -33,23 +33,14 @@ module Metrics
       names.each do |name|
         define_method(name) do |*args|
           value = args[0]
-          if !value.nil?
-            instance_variable_set("@#{name}".to_sym, value)
-            if self.class.respond_to?(:"after_#{name}")
-              self.class.send(:"after_#{name}", value)
-            end
-          end
+          instance_variable_set("@#{name}".to_sym, value) if !value.nil?
           instance_variable_get("@#{name}".to_sym)
         end
       end
     end
 
-    attr_option :email, :logging, :delete_after, :sites, :environment,
+    attr_option :email, :delete_after, :sites,
                 :db_adapter, :db_host, :db_username, :db_password, :db_database
-
-    def self.after_environment(value)
-      Metrics::App.set :environment, value
-    end
   end
 
   class Site
@@ -58,6 +49,16 @@ module Metrics
     property :id,     Serial
     property :domain, String, :required => true, :unique => true
 
+    has n, :visitors
+    has n, :visits, :through => :visitors
+  end
+
+  class Visitor
+    include DataMapper::Resource
+
+    property :id, Serial
+
+    belongs_to :site, :key => true
     has n, :visits
   end
 
@@ -66,17 +67,14 @@ module Metrics
 
     property :id, Serial
 
-    belongs_to :site, :key => true
+    belongs_to :visitor, :key => true
+    has 1, :site, :through => :visitor
   end
 
   DataMapper.finalize
 
   class App < Sinatra::Base
-    set :dump_errors, true
-    set :raise_errors, false
-    set :show_exceptions, false
     set :logging, true
-    set :environment, :production
 
     get '/' do
       'OK'
@@ -88,7 +86,7 @@ module Metrics
         :from => "metrics@#{Metrics.config.email.split('@')[1..-1].join}",
         :subject => 'Metrics Error',
         :body => request.env['sinatra.error'].to_s
-      ) if Metrics.config.email
+      ) if Metrics.config.email && self.class.environment == :production
     end
   end
 end

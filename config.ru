@@ -2,7 +2,6 @@ require File.expand_path('lib/metrics', File.dirname(__FILE__))
 
 Metrics.configure(!ENV['METRICS_CMD'].nil?) do |c|
   c.email       'dev@localhost'
-  c.logging     'dev.log'
   c.db_adapter  'sqlite3'
   c.db_host     'localhost'
   c.db_username 'root'

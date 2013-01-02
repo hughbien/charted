@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'data_mapper'
   s.add_dependency 'pony'
   s.add_development_dependency 'minitest'
-  s.add_development_dependency 'shotgun'
  
   s.files         = Dir.glob('*.{md,rb,ru}') +
                     %w(metrics) +
