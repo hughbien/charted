@@ -10,4 +10,6 @@ Metrics.configure do |c|
   c.sites       ['localhost']
 end
 
-run Metrics::App if !ENV['METRICS_CMD']
+if !ENV['METRICS_CMD']
+  map('/metrics') { run Metrics::App } 
+end

@@ -71,6 +71,9 @@ Then run:
     $ ./metrics --migrate
     $ shotgun
 
+Head on over to `http://localhost:9393/metrics/prime.html`.  This is where
+recordings should occur.
+
 Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 
 TODO
@@ -92,6 +95,7 @@ TODO
 * add `--js` option
 * optimize with If-Not-Modified or img instead of script
 * ignore switch for developers
+* setting for mounting on other paths besides `/metrics`
 
 License
 =======
