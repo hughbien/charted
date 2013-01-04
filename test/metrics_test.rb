@@ -63,8 +63,17 @@ class ModelTest < MetricsTest
     site = Metrics::Site.create(:domain => 'localhost')
     visitor = Metrics::Visitor.create(:site => site)
     visit = Metrics::Visit.create(:visitor => visitor)
-    assert_equal site, visit.site
-    assert_equal [visit], site.visits
+    assert_equal(site, visit.site)
+    assert_equal([visit], site.visits)
+    assert_match(/^\w{5}$/, visitor.secret)
+    assert_equal("#{visitor.id}-#{visitor.secret}", visitor.cookie)
+
+    assert_equal(visitor, Metrics::Visitor.get_by_cookie(site, visitor.cookie))
+    assert_nil(Metrics::Visitor.get_by_cookie(site, "#{visitor.id}-zzzzz"))
+  end
+
+  def test_unique_identifier
+    assert_match(/^\w{5}$/, Metrics::Visitor.generate_secret)
   end
 end
 
@@ -76,26 +85,56 @@ class AppTest < MetricsTest
     Metrics::Visitor.destroy
     Metrics::Visit.destroy
     clear_cookies
+
+    @site = Metrics::Site.create(:domain => 'example.org')
   end
 
   def test_environment
-    assert_equal :test, Metrics::App.environment
+    assert_equal(:test, Metrics::App.environment)
   end
 
-  def test_metrics_js
-    get '/?js'
-    assert last_response.ok?
+  def test_bad_domain
+    get '/?js', {}, 'HTTP_HOST' => 'localhost'
+    assert_equal(404, last_response.status)
+    assert_equal(0, Metrics::Visitor.count)
+    assert_equal(0, Metrics::Visit.count)
   end
 
-  def test_metrics_new_visitor
+  def test_new_visitor
     get '/?js'
-    # assert_equal('bar', rack_mock_session.cookie_jar['foo'])
+    assert(last_response.ok?)
+    assert_equal(1, Metrics::Visitor.count)
+    assert_equal(1, Metrics::Visit.count)
+
+    visitor = Metrics::Visitor.first
+    visit = Metrics::Visit.first
+    assert_equal(@site, visitor.site)
+    assert_equal(@site, visit.site)
+    assert_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
   end
 
-  def test_metrics_old_visitor
-    set_cookie 'foo=bar'
+  def test_old_visitor
+    visitor = Metrics::Visitor.create(:site => @site)
+    visit = Metrics::Visit.create(:visitor => visitor)
+    set_cookie("metrics=#{visitor.cookie}")
+
     get '/?js'
-    # assert_equal('bar', rack_mock_session.cookie_jar['foo'])
+    assert(last_response.ok?)
+    assert_equal(1, Metrics::Visitor.count)
+    assert_equal(2, Metrics::Visit.count)
+    assert_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
+  end
+
+  def test_visitor_bad_cookie
+    visitor = Metrics::Visitor.create(:site => @site)
+    visit = Metrics::Visit.create(:visitor => visitor)
+    set_cookie("metrics=#{visitor.id}-zzzzz")
+
+    get '/?js'
+    assert(last_response.ok?)
+    assert_equal(2, Metrics::Visitor.count)
+    assert_equal(2, Metrics::Visit.count)
+    refute_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
   end
 
   private

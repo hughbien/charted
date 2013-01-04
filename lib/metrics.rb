@@ -3,6 +3,7 @@ require 'sinatra/base'
 require 'dm-core'
 require 'dm-types'
 require 'dm-timestamps'
+require 'dm-validations'
 require 'date'
 require 'digest/sha1'
 require 'json'
@@ -57,9 +58,32 @@ module Metrics
     include DataMapper::Resource
 
     property :id, Serial
+    property :secret, String, :required => true
 
-    belongs_to :site, :key => true
+    belongs_to :site
     has n, :visits
+
+    validates_presence_of :site
+
+    def initialize(*args)
+      super
+      self.secret = self.class.generate_secret
+    end
+
+    def cookie
+      "#{self.id}-#{self.secret}"
+    end
+
+    def self.get_by_cookie(site, cookie)
+      visitor = Visitor.get(cookie.to_s.split('-').first)
+      visitor && visitor.site == site && visitor.cookie == cookie ?
+        visitor :
+        nil
+    end
+
+    def self.generate_secret
+      Digest::SHA1.hexdigest("#{Time.now}-#{rand(100)}")[0..4]
+    end
   end
 
   class Visit
@@ -67,8 +91,10 @@ module Metrics
 
     property :id, Serial
 
-    belongs_to :visitor, :key => true
+    belongs_to :visitor
     has 1, :site, :through => :visitor
+
+    validates_presence_of :visitor
   end
 
   DataMapper.finalize
@@ -77,6 +103,22 @@ module Metrics
     set :logging, true
 
     get '/' do
+      site = Site.first(:domain => request.host)
+      halt(404) if site.nil?
+
+      if request.cookies['metrics']
+        visitor = Visitor.get_by_cookie(site, request.cookies['metrics'])
+      end
+
+      if visitor.nil?
+        visitor = Visitor.create(:site => site)
+        response.set_cookie(
+          'metrics',
+          :value => visitor.cookie,
+          :expires => (Date.today + 365*2).to_time)
+      end
+
+      visit = Visit.create(:visitor => visitor)
       'OK'
     end
 

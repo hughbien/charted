@@ -30,6 +30,10 @@ Stick this in your `bashrc` or `zshrc`:
 
     METRICS_CONFIG='/path/to/config.ru'
 
+Then initialize the database:
+
+    $ metrics --init
+
 The app should be mounted to `/metrics` path on your domain.  Then in your app,
 include the script right before the closing `</body>` tag:
 
@@ -57,12 +61,11 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* write/get cookies to distinguish between unique visitors
-* track visits (total + unique)
 * track pages (total + unique)
 * track referrers (total + unique)
 * track browsers, OS, scren size (unique only)
 * track searches/found (total + unique)
+* track geolocation (unique only)
 * add CLI for pulling stats out
 * add event tracking
 * add funnel conversion tracking
