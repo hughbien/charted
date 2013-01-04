@@ -9,6 +9,21 @@ ENV['METRICS_CMD'] = '1'
 
 module Metrics
   class Command
+    def migrate
+      load_config
+      DataMapper.auto_upgrade!
+    end
+
+    private
+    def load_config
+      file = ENV['METRICS_CONFIG']
+      if file.nil?
+        puts "METRICS_CONFIG not set, please set to `config.ru` file."
+        exit
+      else
+        load(file)
+      end
+    end
   end
 end
 
@@ -17,6 +32,7 @@ ARGV.options do |o|
   o.set_summary_indent('  ')
   o.banner = "Usage: #{File.basename($0)} [OPTION]"
   o.on('-h', '--help', 'show this help message') { puts o; exit }
+  o.on('-m', '--migrate', 'migrates database') { cmd.migrate; exit }
   o.parse!
   puts o
 end

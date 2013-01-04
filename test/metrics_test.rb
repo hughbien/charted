@@ -94,14 +94,14 @@ class AppTest < MetricsTest
   end
 
   def test_bad_domain
-    get '/?js', {}, 'HTTP_HOST' => 'localhost'
+    get '/', {}, 'HTTP_HOST' => 'localhost'
     assert_equal(404, last_response.status)
     assert_equal(0, Metrics::Visitor.count)
     assert_equal(0, Metrics::Visit.count)
   end
 
   def test_new_visitor
-    get '/?js'
+    get '/'
     assert(last_response.ok?)
     assert_equal(1, Metrics::Visitor.count)
     assert_equal(1, Metrics::Visit.count)
@@ -118,7 +118,7 @@ class AppTest < MetricsTest
     visit = Metrics::Visit.create(:visitor => visitor)
     set_cookie("metrics=#{visitor.cookie}")
 
-    get '/?js'
+    get '/'
     assert(last_response.ok?)
     assert_equal(1, Metrics::Visitor.count)
     assert_equal(2, Metrics::Visit.count)
@@ -130,7 +130,7 @@ class AppTest < MetricsTest
     visit = Metrics::Visit.create(:visitor => visitor)
     set_cookie("metrics=#{visitor.id}-zzzzz")
 
-    get '/?js'
+    get '/'
     assert(last_response.ok?)
     assert_equal(2, Metrics::Visitor.count)
     assert_equal(2, Metrics::Visit.count)

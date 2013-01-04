@@ -32,12 +32,18 @@ Stick this in your `bashrc` or `zshrc`:
 
 Then initialize the database:
 
-    $ metrics --init
+    $ metrics --migrate
 
 The app should be mounted to `/metrics` path on your domain.  Then in your app,
 include the script right before the closing `</body>` tag:
 
-    <script src="/metrics/?js" async></script>
+    <script src="/metrics/script.js" async></script>
+
+If you concatenate your JavaScript, you can generate the `script.js` file and
+add it to your project.  The downside being when you update the metrics gem,
+you'll also have to remember to update the JavaScript:
+
+    $ metrics --js > /path/to/my/project/public/metrics.js
 
 Updating
 ========
@@ -55,6 +61,15 @@ the included command line application.
 
 Development
 ===========
+
+Put this in your `zshrc` or `bashrc`:
+
+    export METRICS_CONFIG="/path/to/metrics/config.ru"
+
+Then run:
+
+    $ ./metrics --migrate
+    $ shotgun
 
 Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 
@@ -74,6 +89,9 @@ TODO
 * add deletion via CLI
 * add deletion every N days for fresh data
 * add syncing for local dashboard
+* add `--js` option
+* optimize with If-Not-Modified or img instead of script
+* ignore switch for developers
 
 License
 =======
