@@ -62,7 +62,8 @@ class ModelTest < MetricsTest
   def test_create
     site = Metrics::Site.create(:domain => 'localhost')
     visitor = Metrics::Visitor.create(:site => site)
-    visit = Metrics::Visit.create(:visitor => visitor)
+    visit = Metrics::Visit.create(
+      :visitor => visitor, :path => '/', :title => 'Prime')
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
     assert_match(/^\w{5}$/, visitor.secret)
@@ -87,6 +88,7 @@ class AppTest < MetricsTest
     clear_cookies
 
     @site = Metrics::Site.create(:domain => 'example.org')
+    @params = {:path => '/', :title => 'Prime'}
   end
 
   def test_environment
@@ -94,14 +96,14 @@ class AppTest < MetricsTest
   end
 
   def test_bad_domain
-    get '/', {}, 'HTTP_HOST' => 'localhost'
+    get '/metrics', @params, 'HTTP_HOST' => 'localhost'
     assert_equal(404, last_response.status)
     assert_equal(0, Metrics::Visitor.count)
     assert_equal(0, Metrics::Visit.count)
   end
 
   def test_new_visitor
-    get '/'
+    get '/metrics', @params
     assert(last_response.ok?)
     assert_equal(1, Metrics::Visitor.count)
     assert_equal(1, Metrics::Visit.count)
@@ -115,10 +117,11 @@ class AppTest < MetricsTest
 
   def test_old_visitor
     visitor = Metrics::Visitor.create(:site => @site)
-    visit = Metrics::Visit.create(:visitor => visitor)
+    visit = Metrics::Visit.create(
+      :visitor => visitor, :path => '/', :title => 'Prime')
     set_cookie("metrics=#{visitor.cookie}")
 
-    get '/'
+    get '/metrics', @params
     assert(last_response.ok?)
     assert_equal(1, Metrics::Visitor.count)
     assert_equal(2, Metrics::Visit.count)
@@ -127,10 +130,11 @@ class AppTest < MetricsTest
 
   def test_visitor_bad_cookie
     visitor = Metrics::Visitor.create(:site => @site)
-    visit = Metrics::Visit.create(:visitor => visitor)
+    visit = Metrics::Visit.create(
+      :visitor => visitor, :path => '/', :title => 'Prime')
     set_cookie("metrics=#{visitor.id}-zzzzz")
 
-    get '/'
+    get '/metrics', @params
     assert(last_response.ok?)
     assert_equal(2, Metrics::Visitor.count)
     assert_equal(2, Metrics::Visit.count)

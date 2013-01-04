@@ -79,7 +79,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* track pages (total + unique)
 * track referrers (total + unique)
 * track browsers, OS, scren size (unique only)
 * track searches/found (total + unique)

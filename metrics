@@ -12,6 +12,11 @@ module Metrics
     def migrate
       load_config
       DataMapper.auto_upgrade!
+      Metrics.config.sites.each do |domain|
+        if Metrics::Site.first(:domain => domain).nil?
+          Metrics::Site.create(:domain => domain)
+        end
+      end
     end
 
     private

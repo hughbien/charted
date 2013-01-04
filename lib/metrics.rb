@@ -90,6 +90,8 @@ module Metrics
     include DataMapper::Resource
 
     property :id, Serial
+    property :path, String, :required => true
+    property :title, String, :required => true
 
     belongs_to :visitor
     has 1, :site, :through => :visitor
@@ -118,7 +120,10 @@ module Metrics
           :expires => (Date.today + 365*2).to_time)
       end
 
-      visit = Visit.create(:visitor => visitor)
+      visit = Visit.create(
+        :visitor => visitor,
+        :path => params[:path],
+        :title => params[:title])
       'OK'
     end
 
