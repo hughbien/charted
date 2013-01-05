@@ -22,4 +22,5 @@ var Metrics = {
 };
 Metrics.send(
   "path=" + encodeURIComponent(window.location.pathname) +
-  "&title=" + encodeURIComponent(document.title));
+  "&title=" + encodeURIComponent(document.title) +
+  "&referrer=" + encodeURIComponent(document.referrer));

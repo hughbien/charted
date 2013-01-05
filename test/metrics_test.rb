@@ -63,7 +63,7 @@ class ModelTest < MetricsTest
     site = Metrics::Site.create(:domain => 'localhost')
     visitor = Metrics::Visitor.create(:site => site)
     visit = Metrics::Visit.create(
-      :visitor => visitor, :path => '/', :title => 'Prime')
+      :visitor => visitor, :path => '/', :title => 'Prime', :referrer => 'example.org')
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
     assert_match(/^\w{5}$/, visitor.secret)
@@ -88,7 +88,7 @@ class AppTest < MetricsTest
     clear_cookies
 
     @site = Metrics::Site.create(:domain => 'example.org')
-    @params = {:path => '/', :title => 'Prime'}
+    @params = {:path => '/', :title => 'Prime', :referrer => 'localhost'}
   end
 
   def test_environment
@@ -112,6 +112,9 @@ class AppTest < MetricsTest
     visit = Metrics::Visit.first
     assert_equal(@site, visitor.site)
     assert_equal(@site, visit.site)
+    assert_equal('Prime', visit.title)
+    assert_equal('/', visit.path)
+    assert_equal('localhost', visit.referrer)
     assert_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
   end
 

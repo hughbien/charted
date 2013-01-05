@@ -47,8 +47,9 @@ module Metrics
   class Site
     include DataMapper::Resource
 
-    property :id,     Serial
+    property :id, Serial
     property :domain, String, :required => true, :unique => true
+    property :created_at, DateTime
 
     has n, :visitors
     has n, :visits, :through => :visitors
@@ -59,6 +60,7 @@ module Metrics
 
     property :id, Serial
     property :secret, String, :required => true
+    property :created_at, DateTime
 
     belongs_to :site
     has n, :visits
@@ -92,6 +94,8 @@ module Metrics
     property :id, Serial
     property :path, String, :required => true
     property :title, String, :required => true
+    property :referrer, String
+    property :created_at, DateTime
 
     belongs_to :visitor
     has 1, :site, :through => :visitor
@@ -123,7 +127,8 @@ module Metrics
       visit = Visit.create(
         :visitor => visitor,
         :path => params[:path],
-        :title => params[:title])
+        :title => params[:title],
+        :referrer => params[:referrer])
       '/**/'
     end
 
