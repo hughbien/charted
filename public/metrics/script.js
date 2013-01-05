@@ -1,8 +1,11 @@
 var Metrics = {
   URL: "/metrics/",
-  post: function(queryString) {
-    var img = new Image();
-    img.src = this.URL + "?" + queryString;
+  send: function(queryString) {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.async = true;
+    script.src = this.URL + "?" + queryString;
+    document.getElementsByTagName("head")[0].appendChild(script);
   },
   cookie: function() {
     var obj = {};
@@ -17,6 +20,6 @@ var Metrics = {
     return decodeURIComponent(encoded.replace("+", "%20"));
   }
 };
-Metrics.post(
+Metrics.send(
   "path=" + encodeURIComponent(window.location.pathname) +
   "&title=" + encodeURIComponent(document.title));

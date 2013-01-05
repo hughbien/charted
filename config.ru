@@ -1,6 +1,6 @@
 require File.expand_path('lib/metrics', File.dirname(__FILE__))
 
-Metrics.configure do |c|
+Metrics.configure(ENV['RACK_ENV'] != 'test') do |c|
   c.email       'dev@localhost'
   c.db_adapter  'sqlite3'
   c.db_host     'localhost'

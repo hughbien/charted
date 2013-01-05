@@ -95,6 +95,7 @@ TODO
 * optimize with If-Not-Modified or img instead of script
 * ignore switch for developers
 * setting for mounting on other paths besides `/metrics`
+* deploy task in Rakefile for development
 
 License
 =======

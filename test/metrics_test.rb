@@ -29,7 +29,7 @@ class MetricsTest < MiniTest::Unit::TestCase
       c.db_host     'localhost'
       c.db_username 'root'
       c.db_password 'secret'
-      c.db_database 'db.sqlite3'
+      c.db_database 'test.sqlite3'
       c.sites       ['localhost']
     end
     Pony.mail(nil)
@@ -47,7 +47,7 @@ class ConfigTest < MetricsTest
     assert_equal('localhost', Metrics.config.db_host)
     assert_equal('root', Metrics.config.db_username)
     assert_equal('secret', Metrics.config.db_password)
-    assert_equal('db.sqlite3', Metrics.config.db_database)
+    assert_equal('test.sqlite3', Metrics.config.db_database)
     assert_equal(['localhost'], Metrics.config.sites)
   end
 end

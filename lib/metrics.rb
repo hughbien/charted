@@ -124,7 +124,7 @@ module Metrics
         :visitor => visitor,
         :path => params[:path],
         :title => params[:title])
-      'OK'
+      '/**/'
     end
 
     error do
