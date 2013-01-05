@@ -60,6 +60,7 @@ module Metrics
 
     property :id, Serial
     property :secret, String, :required => true
+    property :resolution, String
     property :created_at, DateTime
 
     belongs_to :site
@@ -117,7 +118,9 @@ module Metrics
       end
 
       if visitor.nil?
-        visitor = Visitor.create(:site => site)
+        visitor = Visitor.create(
+          :site => site,
+          :resolution => params[:resolution])
         response.set_cookie(
           'metrics',
           :value => visitor.cookie,

@@ -88,7 +88,12 @@ class AppTest < MetricsTest
     clear_cookies
 
     @site = Metrics::Site.create(:domain => 'example.org')
-    @params = {:path => '/', :title => 'Prime', :referrer => 'localhost'}
+    @params = {
+      :path => '/',
+      :title => 'Prime',
+      :referrer => 'localhost',
+      :resolution => '1280x800'
+    }
   end
 
   def test_environment
@@ -115,6 +120,7 @@ class AppTest < MetricsTest
     assert_equal('Prime', visit.title)
     assert_equal('/', visit.path)
     assert_equal('localhost', visit.referrer)
+    assert_equal('1280x800', visitor.resolution)
     assert_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
   end
 

@@ -23,4 +23,5 @@ var Metrics = {
 Metrics.send(
   "path=" + encodeURIComponent(window.location.pathname) +
   "&title=" + encodeURIComponent(document.title) +
-  "&referrer=" + encodeURIComponent(document.referrer));
+  "&referrer=" + encodeURIComponent(document.referrer) +
+  "&resolution=" + encodeURIComponent(screen.width+"x"+screen.height));
