@@ -79,7 +79,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* track browsers, OS (unique only)
 * track searches/found (total + unique)
 * track geolocation (unique only)
 * add CLI for pulling stats out

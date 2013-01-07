@@ -61,13 +61,22 @@ class ModelTest < MetricsTest
 
   def test_create
     site = Metrics::Site.create(:domain => 'localhost')
-    visitor = Metrics::Visitor.create(:site => site)
+    visitor = Metrics::Visitor.create(
+      :site => site,
+      :user_agent =>
+        'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1')
     visit = Metrics::Visit.create(
-      :visitor => visitor, :path => '/', :title => 'Prime', :referrer => 'example.org')
+      :visitor => visitor,
+      :path => '/',
+      :title => 'Prime',
+      :referrer => 'example.org')
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
     assert_match(/^\w{5}$/, visitor.secret)
     assert_equal("#{visitor.id}-#{visitor.secret}", visitor.cookie)
+    assert_equal('Linux', visitor.platform)
+    assert_equal('Firefox', visitor.browser)
+    assert_equal('14.0.1', visitor.browser_version)
 
     assert_equal(visitor, Metrics::Visitor.get_by_cookie(site, visitor.cookie))
     assert_nil(Metrics::Visitor.get_by_cookie(site, "#{visitor.id}-zzzzz"))
@@ -75,6 +84,40 @@ class ModelTest < MetricsTest
 
   def test_unique_identifier
     assert_match(/^\w{5}$/, Metrics::Visitor.generate_secret)
+  end
+
+  def test_user_agents
+    visitor = Metrics::Visitor.new
+
+    visitor.user_agent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
+    assert_equal('Internet Explorer', visitor.browser)
+    assert_equal('7.0', visitor.browser_version)
+    assert_equal('Windows', visitor.platform)
+
+    visitor.user_agent = 'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/125.8'
+    assert_equal('Safari', visitor.browser)
+    assert_equal('1.2.2', visitor.browser_version)
+    assert_equal('Macintosh', visitor.platform)
+
+    visitor.user_agent = 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.19) Gecko/20081216 Ubuntu/8.04 (hardy) Firefox/2.0.0.19'
+    assert_equal('Firefox', visitor.browser)
+    assert_equal('2.0.0.19', visitor.browser_version)
+    assert_equal('Linux', visitor.platform)
+  end
+
+  def test_blanks
+    site = Metrics::Site.create(:domain => 'localhost')
+    visitor = Metrics::Visitor.create(
+      :site => site,
+      :user_agent => '')
+    visit = Metrics::Visit.create(
+      :visitor => visitor,
+      :path => '/',
+      :title => 'Prime',
+      :referrer => '')
+    assert(site.id)
+    assert(visitor.id)
+    assert(visit.id)
   end
 end
 
@@ -94,6 +137,10 @@ class AppTest < MetricsTest
       :referrer => 'localhost',
       :resolution => '1280x800'
     }
+    @env = {
+      'HTTP_USER_AGENT' =>
+        'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1'
+    }
   end
 
   def test_environment
@@ -108,7 +155,7 @@ class AppTest < MetricsTest
   end
 
   def test_new_visitor
-    get '/metrics', @params
+    get '/metrics', @params, @env
     assert(last_response.ok?)
     assert_equal(1, Metrics::Visitor.count)
     assert_equal(1, Metrics::Visit.count)
@@ -130,7 +177,7 @@ class AppTest < MetricsTest
       :visitor => visitor, :path => '/', :title => 'Prime')
     set_cookie("metrics=#{visitor.cookie}")
 
-    get '/metrics', @params
+    get '/metrics', @params, @env
     assert(last_response.ok?)
     assert_equal(1, Metrics::Visitor.count)
     assert_equal(2, Metrics::Visit.count)
@@ -143,7 +190,7 @@ class AppTest < MetricsTest
       :visitor => visitor, :path => '/', :title => 'Prime')
     set_cookie("metrics=#{visitor.id}-zzzzz")
 
-    get '/metrics', @params
+    get '/metrics', @params, @env
     assert(last_response.ok?)
     assert_equal(2, Metrics::Visitor.count)
     assert_equal(2, Metrics::Visit.count)

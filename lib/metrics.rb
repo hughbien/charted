@@ -8,6 +8,7 @@ require 'date'
 require 'digest/sha1'
 require 'json'
 require 'pony'
+require 'useragent'
 
 DataMapper::Model.raise_on_save_failure = true
 
@@ -62,6 +63,9 @@ module Metrics
     property :secret, String, :required => true
     property :resolution, String
     property :created_at, DateTime
+    property :platform, String
+    property :browser, String
+    property :browser_version, String
 
     belongs_to :site
     has n, :visits
@@ -75,6 +79,13 @@ module Metrics
 
     def cookie
       "#{self.id}-#{self.secret}"
+    end
+
+    def user_agent=(user_agent)
+      ua = UserAgent.parse(user_agent)
+      self.browser = ua.browser
+      self.browser_version = ua.version
+      self.platform = ua.platform == 'X11' ? 'Linux' : ua.platform
     end
 
     def self.get_by_cookie(site, cookie)
@@ -120,7 +131,8 @@ module Metrics
       if visitor.nil?
         visitor = Visitor.create(
           :site => site,
-          :resolution => params[:resolution])
+          :resolution => params[:resolution],
+          :user_agent => request.user_agent)
         response.set_cookie(
           'metrics',
           :value => visitor.cookie,
