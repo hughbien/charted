@@ -8,6 +8,7 @@ require 'date'
 require 'digest/sha1'
 require 'json'
 require 'uri'
+require 'geoip'
 require 'pony'
 require 'useragent'
 require 'search_terms'
@@ -16,6 +17,7 @@ DataMapper::Model.raise_on_save_failure = true
 
 module Metrics
   VERSION = '0.0.1'
+  GEOIP = GeoIP.new("#{File.dirname(__FILE__)}/../geoip.dat")
 
   def self.configure(setup_db=true)
     yield self.config
@@ -68,6 +70,7 @@ module Metrics
     property :platform, String
     property :browser, String
     property :browser_version, String
+    property :country, String
 
     belongs_to :site
     has n, :visits
@@ -88,6 +91,16 @@ module Metrics
       self.browser = ua.browser
       self.browser_version = ua.version
       self.platform = ua.platform == 'X11' ? 'Linux' : ua.platform
+    end
+
+    def ip_address=(ip)
+      return if ip.to_s =~ /^\s*$/ || ip == '127.0.0.1'
+      name = GEOIP.country(ip).country_name
+
+      return if name =~ /^\s*$/ || name == 'N/A'
+      self.country = name
+    rescue SocketError
+      # invalid IP address, skip setting country
     end
 
     def self.get_by_cookie(site, cookie)
@@ -142,7 +155,8 @@ module Metrics
         visitor = Visitor.create(
           :site => site,
           :resolution => params[:resolution],
-          :user_agent => request.user_agent)
+          :user_agent => request.user_agent,
+          :ip_address => request.ip)
         response.set_cookie(
           'metrics',
           :value => visitor.cookie,

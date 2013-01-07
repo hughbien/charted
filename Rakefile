@@ -19,3 +19,9 @@ end
 task :push => :build do
   `gem push metrics-#{Metrics::VERSION}.gem`
 end
+
+task :geoip do
+  rm 'geoip.dat'
+  `curl "http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz" > geoip.dat.gz`
+  `gunzip geoip.dat.gz`
+end

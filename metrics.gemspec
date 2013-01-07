@@ -11,12 +11,13 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = '>= 1.3.6'
   s.add_dependency 'sinatra'
   s.add_dependency 'data_mapper'
+  s.add_dependency 'geoip'
   s.add_dependency 'pony'
   s.add_dependency 'useragent'
   s.add_dependency 'search_terms'
   s.add_development_dependency 'minitest'
  
-  s.files         = Dir.glob('*.{md,rb,ru}') +
+  s.files         = Dir.glob('*.{md,rb,ru,dat}') +
                     %w(metrics) +
                     Dir.glob('{lib,test}/*.rb')
   s.require_paths = ['lib']

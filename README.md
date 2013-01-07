@@ -79,7 +79,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* track geolocation (unique only)
 * add CLI for pulling stats out
 * add event tracking
 * add funnel conversion tracking
@@ -97,6 +96,8 @@ TODO
 
 License
 =======
+
+`geoip.dat` is provided by MaxMind at <http://dev.maxmind.com/geoip/geolite>.
 
 Copyright Hugh Bien - http://hughbien.com.
 Released under BSD License, see LICENSE.md for more info.

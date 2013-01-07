@@ -63,6 +63,7 @@ class ModelTest < MetricsTest
     site = Metrics::Site.create(:domain => 'localhost')
     visitor = Metrics::Visitor.create(
       :site => site,
+      :ip_address => '67.188.42.140',
       :user_agent =>
         'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1')
     visit = Metrics::Visit.create(
@@ -110,7 +111,8 @@ class ModelTest < MetricsTest
     site = Metrics::Site.create(:domain => 'localhost')
     visitor = Metrics::Visitor.create(
       :site => site,
-      :user_agent => '')
+      :user_agent => '',
+      :ip_address => '')
     visit = Metrics::Visit.create(
       :visitor => visitor,
       :path => '/',
@@ -140,7 +142,8 @@ class AppTest < MetricsTest
     }
     @env = {
       'HTTP_USER_AGENT' =>
-        'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1'
+        'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1',
+      'REMOTE_ADDR' => '67.188.42.140'
     }
   end
 
@@ -169,6 +172,7 @@ class AppTest < MetricsTest
     assert_equal('/', visit.path)
     assert_equal('localhost', visit.referrer)
     assert_equal('1280x800', visitor.resolution)
+    assert_equal('United States', visitor.country)
     assert_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
   end
 
