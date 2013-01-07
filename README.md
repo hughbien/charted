@@ -79,7 +79,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* track searches/found (total + unique)
 * track geolocation (unique only)
 * add CLI for pulling stats out
 * add event tracking
@@ -90,6 +89,7 @@ TODO
 * add deletion every N days for fresh data
 * add syncing for local dashboard
 * add `--js` option
+* normalize referrers by dropping query strings
 * optimize with If-Not-Modified or img instead of script
 * ignore switch for developers
 * setting for mounting on other paths besides `/metrics`

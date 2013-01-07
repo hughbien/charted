@@ -69,9 +69,10 @@ class ModelTest < MetricsTest
       :visitor => visitor,
       :path => '/',
       :title => 'Prime',
-      :referrer => 'example.org')
+      :referrer => 'http://www.google.com?q=Metrics+Test')
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
+    assert_equal('Metrics Test', visit.search_terms)
     assert_match(/^\w{5}$/, visitor.secret)
     assert_equal("#{visitor.id}-#{visitor.secret}", visitor.cookie)
     assert_equal('Linux', visitor.platform)

@@ -7,8 +7,10 @@ require 'dm-validations'
 require 'date'
 require 'digest/sha1'
 require 'json'
+require 'uri'
 require 'pony'
 require 'useragent'
+require 'search_terms'
 
 DataMapper::Model.raise_on_save_failure = true
 
@@ -107,12 +109,20 @@ module Metrics
     property :path, String, :required => true
     property :title, String, :required => true
     property :referrer, String
+    property :search_terms, String
     property :created_at, DateTime
 
     belongs_to :visitor
     has 1, :site, :through => :visitor
 
     validates_presence_of :visitor
+
+    before :save, :set_search_terms
+
+    def set_search_terms
+      return if self.referrer.to_s =~ /^\s*$/
+      self.search_terms = URI.parse(self.referrer).search_string
+    end
   end
 
   DataMapper.finalize
