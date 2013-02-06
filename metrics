@@ -7,37 +7,14 @@ require 'fileutils'
 
 ENV['METRICS_CMD'] = '1'
 
-module Metrics
-  class Command
-    def migrate
-      load_config
-      DataMapper.auto_upgrade!
-      Metrics.config.sites.each do |domain|
-        if Metrics::Site.first(:domain => domain).nil?
-          Metrics::Site.create(:domain => domain)
-        end
-      end
-    end
-
-    private
-    def load_config
-      file = ENV['METRICS_CONFIG']
-      if file.nil?
-        puts "METRICS_CONFIG not set, please set to `config.ru` file."
-        exit
-      else
-        load(file)
-      end
-    end
-  end
-end
-
 ARGV.options do |o|
-  cmd = Metrics::Command.new
+  cmd, action = Metrics::Command.new, nil
   o.set_summary_indent('  ')
   o.banner = "Usage: #{File.basename($0)} [OPTION]"
+  o.on('-d', '--dashboard', 'show dashboard') { action = :dashboard }
   o.on('-h', '--help', 'show this help message') { puts o; exit }
   o.on('-m', '--migrate', 'migrates database') { cmd.migrate; exit }
+  o.on('-s', '--site domain', 'set site') { |site| cmd.site = site }
   o.parse!
-  puts o
+  action.nil? ? puts(o) : cmd.send(action)
 end

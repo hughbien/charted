@@ -180,4 +180,58 @@ module Metrics
       ) if Metrics.config.email && self.class.environment == :production
     end
   end
+
+  class Command
+    attr_accessor :config_loaded, :output
+    attr_reader :site
+
+    def dashboard
+    end
+
+    def migrate
+      load_config
+      DataMapper.auto_upgrade!
+      Metrics.config.sites.each do |domain|
+        if Metrics::Site.first(:domain => domain).nil?
+          Metrics::Site.create(:domain => domain)
+        end
+      end
+    end
+
+    def site=(domain)
+      load_config
+      sites = Site.all(:domain.like => "%#{domain}%")
+
+      if sites.length > 1
+        print("\"#{domain}\" ambiguous: #{sites.map(&:domain).join(', ')}")
+        sys_exit
+      elsif sites.length < 1
+        print("No sites matching \"#{domain}\"")
+        sys_exit
+      else
+        @site = sites.first
+      end
+    end
+
+    private
+    def load_config
+      return if @config_loaded
+      file = ENV['METRICS_CONFIG']
+      load(file)
+      @config_loaded = true
+    rescue LoadError
+      print("METRICS_CONFIG not set, please set to `config.ru` file.")
+      sys_exit
+    end
+
+    def sys_exit
+      ENV['RACK_ENV'] == 'test' ? raise(ExitError.new) : exit
+    end
+
+    def print(string)
+      ENV['RACK_ENV'] == 'test' ?  (@output ||= []) << string : puts(string)
+    end
+  end
+
+  class ExitError < RuntimeError; end
 end

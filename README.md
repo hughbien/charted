@@ -86,12 +86,11 @@ TODO
 * add stats summary for AB tests
 * add deletion via CLI
 * add deletion every N days for fresh data
-* add syncing for local dashboard
 * add `--js` option
-* normalize referrers by dropping query strings
-* optimize with If-Not-Modified or img instead of script
+* add plugin system to CLI and recordings
+* ignore same domain referrers
+* optimize with If-Not-Modified (or use ?timestamp parameter)
 * ignore switch for developers
-* setting for mounting on other paths besides `/metrics`
 * deploy task in Rakefile for development
 
 License

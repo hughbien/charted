@@ -53,7 +53,7 @@ class ConfigTest < MetricsTest
 end
 
 class ModelTest < MetricsTest
-  def teardown
+  def setup
     Metrics::Site.destroy
     Metrics::Visitor.destroy
     Metrics::Visit.destroy
@@ -205,5 +205,33 @@ class AppTest < MetricsTest
   private
   def app
     @app ||= Rack::Server.new.app
+  end
+end
+
+class CommandTest < MetricsTest
+  def setup
+    @cmd = Metrics::Command.new
+    @cmd.config_loaded = true
+    Metrics::Site.destroy
+    Metrics::Visitor.destroy
+    Metrics::Visit.destroy
+    Metrics::Site.create(:domain => 'localhost')
+    Metrics::Site.create(:domain => 'example.org')
+  end
+
+  def test_site
+    assert_raises(Metrics::ExitError) { @cmd.site = 'nomatch' }
+    assert_equal(['No sites matching "nomatch"'], @cmd.output)
+    assert_nil(@cmd.site)
+
+    @cmd.output = nil
+    assert_raises(Metrics::ExitError) { @cmd.site = 'l' }
+    assert_equal(['"l" ambiguous: localhost, example.org'], @cmd.output)
+
+    @cmd.site = 'local'
+    assert_equal('localhost', @cmd.site.domain)
+
+    @cmd.site = 'ample'
+    assert_equal('example.org', @cmd.site.domain)
   end
 end
