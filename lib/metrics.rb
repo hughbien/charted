@@ -12,6 +12,7 @@ require 'geoip'
 require 'pony'
 require 'useragent'
 require 'search_terms'
+require 'colorize'
 
 DataMapper::Model.raise_on_save_failure = true
 
@@ -186,14 +187,15 @@ module Metrics
     attr_reader :site
 
     def dashboard
+      site_required
     end
 
     def migrate
       load_config
       DataMapper.auto_upgrade!
       Metrics.config.sites.each do |domain|
-        if Metrics::Site.first(:domain => domain).nil?
-          Metrics::Site.create(:domain => domain)
+        if Site.first(:domain => domain).nil?
+          Site.create(:domain => domain)
         end
       end
     end
@@ -203,11 +205,9 @@ module Metrics
       sites = Site.all(:domain.like => "%#{domain}%")
 
       if sites.length > 1
-        print("\"#{domain}\" ambiguous: #{sites.map(&:domain).join(', ')}")
-        sys_exit
+        sys_exit("\"#{domain}\" ambiguous: #{sites.map(&:domain).join(', ')}")
       elsif sites.length < 1
-        print("No sites matching \"#{domain}\"")
-        sys_exit
+        sys_exit("No sites matching \"#{domain}\"")
       else
         @site = sites.first
       end
@@ -220,16 +220,24 @@ module Metrics
       load(file)
       @config_loaded = true
     rescue LoadError
-      print("METRICS_CONFIG not set, please set to `config.ru` file.")
-      sys_exit
+      sys_exit("METRICS_CONFIG not set, please set to `config.ru` file.")
     end
 
-    def sys_exit
+    def sys_exit(reason)
+      print(reason)
       ENV['RACK_ENV'] == 'test' ? raise(ExitError.new) : exit
     end
 
     def print(string)
       ENV['RACK_ENV'] == 'test' ?  (@output ||= []) << string : puts(string)
+    end
+
+    def site_required
+      if @site.nil? && Site.count == 1
+        @site = Site.first
+      elsif @site.nil?
+        sys_exit('Please specify website with --site')
+      end
     end
   end
 

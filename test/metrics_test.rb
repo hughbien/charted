@@ -234,4 +234,13 @@ class CommandTest < MetricsTest
     @cmd.site = 'ample'
     assert_equal('example.org', @cmd.site.domain)
   end
+
+  def dashboard
+    assert_raises(Metrics::ExitError) { @cmd.dashboard }
+    assert_equal(['Please specify website with --site'], @cmd.output)
+    
+    @cmd.output = nil
+    @cmd.site = 'localhost'
+    @cmd.dashboard
+  end
 end
