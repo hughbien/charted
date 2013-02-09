@@ -4,6 +4,7 @@ require 'dm-core'
 require 'dm-types'
 require 'dm-timestamps'
 require 'dm-validations'
+require 'dm-aggregates'
 require 'date'
 require 'digest/sha1'
 require 'json'
@@ -12,6 +13,7 @@ require 'geoip'
 require 'pony'
 require 'useragent'
 require 'search_terms'
+require 'terminal-table'
 require 'colorize'
 
 DataMapper::Model.raise_on_save_failure = true
@@ -33,6 +35,18 @@ module Metrics
 
   def self.config
     @config ||= Config.new
+  end
+
+  def self.prev_month(date, delta=1)
+    date = Date.new(date.year, date.month, 1)
+    delta.times { date = Date.new((date - 1).year, (date - 1).month, 1) }
+    date
+  end
+
+  def self.next_month(date, delta=1)
+    date = Date.new(date.year, date.month, 1)
+    delta.times { date = Date.new((date + 32).year, (date + 32).month, 1) }
+    date
   end
 
   class Config
@@ -188,6 +202,49 @@ module Metrics
 
     def dashboard
       site_required
+      table = Terminal::Table.new
+      table << [
+        'Total'.colorize(:light_blue),
+        'Unique'.colorize(:light_blue),
+        'Visits'.colorize(:light_green)]
+      table.add_separator
+      (0..11).each do |delta|
+        date = Metrics.prev_month(Date.today, delta)
+        visits = @site.visits.count(
+          :created_at.gte => date,
+          :created_at.lt => Metrics.next_month(date))
+        unique = @site.visitors.count(:visits => {
+          :created_at.gte => date,
+          :created_at.lt => Metrics.next_month(date)})
+        table << [format(visits), format(unique), date.strftime('%B %Y')]
+      end
+      visitor_total = @site.visitors.count.to_f
+      visit_total = @site.visits.count.to_f
+      [[:browser, 'Browsers', :visitors],
+       [:resolution, 'Resolutions', :visitors],
+       [:platform, 'Platforms', :visitors],
+       [:country, 'Countries', :visitors],
+       [:title, 'Pages', :visits],
+       [:referrer, 'Referrers', :visits],
+       [:search_terms, 'Search Terms', :visits]].each do |field, column, type|
+        table.add_separator
+        table << [
+          'Total'.colorize(:light_blue),
+          '%'.colorize(:light_blue),
+          column.colorize(:light_green)]
+        table.add_separator
+        rows = []
+        @site.send(type).aggregate(field, :all.count).each do |label, count|
+          label = label.to_s.strip
+          label = "#{label[0..37]}..." if label.length > 40
+          total = type == :visitors ? visitor_total : visit_total
+          rows << [format(count), "#{((count / total) * 100).round}%", label]
+        end
+        rows.sort_by { |r| r[1] }.reverse.each { |row| table << row }
+      end
+      table.align_column(0, :right)
+      table.align_column(1, :right)
+      print(table)
     end
 
     def migrate
@@ -233,11 +290,16 @@ module Metrics
     end
 
     def site_required
+      load_config
       if @site.nil? && Site.count == 1
         @site = Site.first
       elsif @site.nil?
         sys_exit('Please specify website with --site')
       end
+    end
+
+    def format(num)
+      num.to_s.reverse.gsub(/...(?=.)/,'\&,').reverse
     end
   end
 

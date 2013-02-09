@@ -57,7 +57,14 @@ The web application is for end users, to get information about your traffic use
 the included command line application.
 
     $ metrics --help
-    $ metrics --site hugh # just needs the first few letters to distinguish
+    $ metrics --dashboard --site hugh # just needs the first few letters
+    +-------+--------+--------------------------------------+
+    | Total | Unique | Visits                               |
+    +-------+--------+--------------------------------------+
+    | 7,012 |  5,919 | February 2013                        |
+    | 6,505 |  4,722 | January 2013                         |
+    | 5,342 |  3,988 | December 2012                        |
+    ...
 
 Development
 ===========
@@ -79,7 +86,7 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* add CLI for pulling stats out
+* clean up `--dashboard` code
 * add event tracking
 * add funnel conversion tracking
 * add AB testing
@@ -88,10 +95,12 @@ TODO
 * add deletion every N days for fresh data
 * add `--js` option
 * add plugin system to CLI and recordings
+* add config for dashboards (what to show/hide, how to order)
 * ignore same domain referrers
 * optimize with If-Not-Modified (or use ?timestamp parameter)
 * ignore switch for developers
 * deploy task in Rakefile for development
+* add `--sync` option
 
 License
 =======

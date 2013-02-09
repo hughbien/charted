@@ -235,12 +235,19 @@ class CommandTest < MetricsTest
     assert_equal('example.org', @cmd.site.domain)
   end
 
-  def dashboard
+  def test_dashboard
     assert_raises(Metrics::ExitError) { @cmd.dashboard }
     assert_equal(['Please specify website with --site'], @cmd.output)
     
     @cmd.output = nil
     @cmd.site = 'localhost'
     @cmd.dashboard
+  end
+
+  def test_format
+    assert_equal('-10,200', @cmd.send(:format, -10200))
+    assert_equal('-1', @cmd.send(:format, -1))
+    assert_equal('1', @cmd.send(:format, 1))
+    assert_equal('1,200,300', @cmd.send(:format, 1200300))
   end
 end
