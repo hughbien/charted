@@ -206,8 +206,9 @@ module Metrics
       tables = []
       chart = Dashline::Chart.new
       chart2 = Dashline::Chart.new
-      chart.max_width(60)
-      chart2.max_width(60)
+      max_width = [`tput cols`.to_i / 2, 60].min
+      chart.max_width(max_width)
+      chart2.max_width(max_width)
       chart.title "Total Visits".colorize(:light_green)
       chart2.title "Unique Visits".colorize(:light_green)
       table = Dashline::Table.new
@@ -216,7 +217,7 @@ module Metrics
         'Unique'.colorize(:light_blue),
         'Visits'.colorize(:light_green))
       table.separator
-      table.max_width(60)
+      table.max_width(max_width)
       (0..11).each do |delta|
         date = Metrics.prev_month(Date.today, delta)
         visits = @site.visits.count(
@@ -241,7 +242,7 @@ module Metrics
        [:referrer, 'Referrers', :visits],
        [:search_terms, 'Searches', :visits]].each do |field, column, type|
         table = Dashline::Table.new
-        table.max_width(60)
+        table.max_width(max_width)
         table.spacing :min, :min, :max
         table.row('Total'.colorize(:light_blue),
           '%'.colorize(:light_blue),
