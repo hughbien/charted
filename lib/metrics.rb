@@ -15,6 +15,7 @@ require 'useragent'
 require 'search_terms'
 require 'terminal-table'
 require 'colorize'
+require 'dashline'
 
 DataMapper::Model.raise_on_save_failure = true
 
@@ -202,12 +203,20 @@ module Metrics
 
     def dashboard
       site_required
-      table = Terminal::Table.new
-      table << [
-        'Total'.colorize(:light_blue),
+      tables = []
+      chart = Dashline::Chart.new
+      chart2 = Dashline::Chart.new
+      chart.max_width(60)
+      chart2.max_width(60)
+      chart.title "Total Visits".colorize(:light_green)
+      chart2.title "Unique Visits".colorize(:light_green)
+      table = Dashline::Table.new
+      table.spacing :min, :min, :max
+      table.row('Total'.colorize(:light_blue),
         'Unique'.colorize(:light_blue),
-        'Visits'.colorize(:light_green)]
-      table.add_separator
+        'Visits'.colorize(:light_green))
+      table.separator
+      table.max_width(60)
       (0..11).each do |delta|
         date = Metrics.prev_month(Date.today, delta)
         visits = @site.visits.count(
@@ -216,35 +225,45 @@ module Metrics
         unique = @site.visitors.count(:visits => {
           :created_at.gte => date,
           :created_at.lt => Metrics.next_month(date)})
-        table << [format(visits), format(unique), date.strftime('%B %Y')]
+        table.row(format(visits), format(unique), date.strftime('%B %Y'))
+        table.align :right, :right, :left
+        chart.row date.strftime('%b %Y'), visits
+        chart2.row date.strftime('%b %Y'), unique
       end
-      visitor_total = @site.visitors.count.to_f
-      visit_total = @site.visits.count.to_f
+      tables << table
+      tables << chart
+      tables << chart2
       [[:browser, 'Browsers', :visitors],
        [:resolution, 'Resolutions', :visitors],
        [:platform, 'Platforms', :visitors],
        [:country, 'Countries', :visitors],
        [:title, 'Pages', :visits],
        [:referrer, 'Referrers', :visits],
-       [:search_terms, 'Search Terms', :visits]].each do |field, column, type|
-        table.add_separator
-        table << [
-          'Total'.colorize(:light_blue),
+       [:search_terms, 'Searches', :visits]].each do |field, column, type|
+        table = Dashline::Table.new
+        table.max_width(60)
+        table.spacing :min, :min, :max
+        table.row('Total'.colorize(:light_blue),
           '%'.colorize(:light_blue),
-          column.colorize(:light_green)]
-        table.add_separator
+          column.colorize(:light_green))
+        table.separator
         rows = []
+        total = @site.send(type).count(field.not => nil)
         @site.send(type).aggregate(field, :all.count).each do |label, count|
           label = label.to_s.strip
+          next if label == ""
           label = "#{label[0..37]}..." if label.length > 40
-          total = type == :visitors ? visitor_total : visit_total
-          rows << [format(count), "#{((count / total) * 100).round}%", label]
+          rows << [format(count), "#{((count / total.to_f) * 100).round}%", label]
         end
-        rows.sort_by { |r| r[1] }.reverse.each { |row| table << row }
+        rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+        table.align :right, :right, :left
+        tables << table
       end
-      table.align_column(0, :right)
-      table.align_column(1, :right)
-      print(table)
+
+      grid = Dashline::Grid.new
+      grid.width(`tput cols`.to_i)
+      tables.each { |t| grid.add(t) }
+      print(grid)
     end
 
     def migrate
