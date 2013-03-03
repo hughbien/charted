@@ -1,6 +1,6 @@
 ENV['RACK_ENV'] = 'test'
 
-require File.expand_path('../lib/metrics', File.dirname(__FILE__))
+require File.expand_path('../lib/charted', File.dirname(__FILE__))
 require 'dm-migrations'
 require 'minitest/autorun'
 require 'rack'
@@ -21,9 +21,9 @@ module Pony
   end
 end
 
-class MetricsTest < MiniTest::Unit::TestCase
+class ChartedTest < MiniTest::Unit::TestCase
   def setup
-    Metrics.configure(false) do |c|
+    Charted.configure(false) do |c|
       c.email       'dev@localhost'
       c.db_adapter  'sqlite3'
       c.db_host     'localhost'
@@ -40,56 +40,56 @@ class MetricsTest < MiniTest::Unit::TestCase
   end
 end
 
-class ConfigTest < MetricsTest
+class ConfigTest < ChartedTest
   def test_db
-    assert_equal('dev@localhost', Metrics.config.email)
-    assert_equal('sqlite3', Metrics.config.db_adapter)
-    assert_equal('localhost', Metrics.config.db_host)
-    assert_equal('root', Metrics.config.db_username)
-    assert_equal('secret', Metrics.config.db_password)
-    assert_equal('test.sqlite3', Metrics.config.db_database)
-    assert_equal(['localhost'], Metrics.config.sites)
+    assert_equal('dev@localhost', Charted.config.email)
+    assert_equal('sqlite3', Charted.config.db_adapter)
+    assert_equal('localhost', Charted.config.db_host)
+    assert_equal('root', Charted.config.db_username)
+    assert_equal('secret', Charted.config.db_password)
+    assert_equal('test.sqlite3', Charted.config.db_database)
+    assert_equal(['localhost'], Charted.config.sites)
   end
 end
 
-class ModelTest < MetricsTest
+class ModelTest < ChartedTest
   def setup
-    Metrics::Site.destroy
-    Metrics::Visitor.destroy
-    Metrics::Visit.destroy
+    Charted::Site.destroy
+    Charted::Visitor.destroy
+    Charted::Visit.destroy
   end
 
   def test_create
-    site = Metrics::Site.create(:domain => 'localhost')
-    visitor = Metrics::Visitor.create(
+    site = Charted::Site.create(:domain => 'localhost')
+    visitor = Charted::Visitor.create(
       :site => site,
       :ip_address => '67.188.42.140',
       :user_agent =>
         'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1')
-    visit = Metrics::Visit.create(
+    visit = Charted::Visit.create(
       :visitor => visitor,
       :path => '/',
       :title => 'Prime',
-      :referrer => 'http://www.google.com?q=Metrics+Test')
+      :referrer => 'http://www.google.com?q=Charted+Test')
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
-    assert_equal('Metrics Test', visit.search_terms)
+    assert_equal('Charted Test', visit.search_terms)
     assert_match(/^\w{5}$/, visitor.secret)
     assert_equal("#{visitor.id}-#{visitor.secret}", visitor.cookie)
     assert_equal('Linux', visitor.platform)
     assert_equal('Firefox', visitor.browser)
     assert_equal('14.0.1', visitor.browser_version)
 
-    assert_equal(visitor, Metrics::Visitor.get_by_cookie(site, visitor.cookie))
-    assert_nil(Metrics::Visitor.get_by_cookie(site, "#{visitor.id}-zzzzz"))
+    assert_equal(visitor, Charted::Visitor.get_by_cookie(site, visitor.cookie))
+    assert_nil(Charted::Visitor.get_by_cookie(site, "#{visitor.id}-zzzzz"))
   end
 
   def test_unique_identifier
-    assert_match(/^\w{5}$/, Metrics::Visitor.generate_secret)
+    assert_match(/^\w{5}$/, Charted::Visitor.generate_secret)
   end
 
   def test_user_agents
-    visitor = Metrics::Visitor.new
+    visitor = Charted::Visitor.new
 
     visitor.user_agent = 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)'
     assert_equal('Internet Explorer', visitor.browser)
@@ -108,12 +108,12 @@ class ModelTest < MetricsTest
   end
 
   def test_blanks
-    site = Metrics::Site.create(:domain => 'localhost')
-    visitor = Metrics::Visitor.create(
+    site = Charted::Site.create(:domain => 'localhost')
+    visitor = Charted::Visitor.create(
       :site => site,
       :user_agent => '',
       :ip_address => '')
-    visit = Metrics::Visit.create(
+    visit = Charted::Visit.create(
       :visitor => visitor,
       :path => '/',
       :title => 'Prime',
@@ -124,16 +124,16 @@ class ModelTest < MetricsTest
   end
 end
 
-class AppTest < MetricsTest
+class AppTest < ChartedTest
   include Rack::Test::Methods
 
   def setup
-    Metrics::Site.destroy
-    Metrics::Visitor.destroy
-    Metrics::Visit.destroy
+    Charted::Site.destroy
+    Charted::Visitor.destroy
+    Charted::Visit.destroy
     clear_cookies
 
-    @site = Metrics::Site.create(:domain => 'example.org')
+    @site = Charted::Site.create(:domain => 'example.org')
     @params = {
       :path => '/',
       :title => 'Prime',
@@ -148,24 +148,24 @@ class AppTest < MetricsTest
   end
 
   def test_environment
-    assert_equal(:test, Metrics::App.environment)
+    assert_equal(:test, Charted::App.environment)
   end
 
   def test_bad_domain
-    get '/metrics', @params, 'HTTP_HOST' => 'localhost'
+    get '/charted', @params, 'HTTP_HOST' => 'localhost'
     assert_equal(404, last_response.status)
-    assert_equal(0, Metrics::Visitor.count)
-    assert_equal(0, Metrics::Visit.count)
+    assert_equal(0, Charted::Visitor.count)
+    assert_equal(0, Charted::Visit.count)
   end
 
   def test_new_visitor
-    get '/metrics', @params, @env
+    get '/charted', @params, @env
     assert(last_response.ok?)
-    assert_equal(1, Metrics::Visitor.count)
-    assert_equal(1, Metrics::Visit.count)
+    assert_equal(1, Charted::Visitor.count)
+    assert_equal(1, Charted::Visit.count)
 
-    visitor = Metrics::Visitor.first
-    visit = Metrics::Visit.first
+    visitor = Charted::Visitor.first
+    visit = Charted::Visit.first
     assert_equal(@site, visitor.site)
     assert_equal(@site, visit.site)
     assert_equal('Prime', visit.title)
@@ -173,33 +173,33 @@ class AppTest < MetricsTest
     assert_equal('localhost', visit.referrer)
     assert_equal('1280x800', visitor.resolution)
     assert_equal('United States', visitor.country)
-    assert_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
+    assert_equal(visitor.cookie, rack_mock_session.cookie_jar['charted'])
   end
 
   def test_old_visitor
-    visitor = Metrics::Visitor.create(:site => @site)
-    visit = Metrics::Visit.create(
+    visitor = Charted::Visitor.create(:site => @site)
+    visit = Charted::Visit.create(
       :visitor => visitor, :path => '/', :title => 'Prime')
-    set_cookie("metrics=#{visitor.cookie}")
+    set_cookie("charted=#{visitor.cookie}")
 
-    get '/metrics', @params, @env
+    get '/charted', @params, @env
     assert(last_response.ok?)
-    assert_equal(1, Metrics::Visitor.count)
-    assert_equal(2, Metrics::Visit.count)
-    assert_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
+    assert_equal(1, Charted::Visitor.count)
+    assert_equal(2, Charted::Visit.count)
+    assert_equal(visitor.cookie, rack_mock_session.cookie_jar['charted'])
   end
 
   def test_visitor_bad_cookie
-    visitor = Metrics::Visitor.create(:site => @site)
-    visit = Metrics::Visit.create(
+    visitor = Charted::Visitor.create(:site => @site)
+    visit = Charted::Visit.create(
       :visitor => visitor, :path => '/', :title => 'Prime')
-    set_cookie("metrics=#{visitor.id}-zzzzz")
+    set_cookie("charted=#{visitor.id}-zzzzz")
 
-    get '/metrics', @params, @env
+    get '/charted', @params, @env
     assert(last_response.ok?)
-    assert_equal(2, Metrics::Visitor.count)
-    assert_equal(2, Metrics::Visit.count)
-    refute_equal(visitor.cookie, rack_mock_session.cookie_jar['metrics'])
+    assert_equal(2, Charted::Visitor.count)
+    assert_equal(2, Charted::Visit.count)
+    refute_equal(visitor.cookie, rack_mock_session.cookie_jar['charted'])
   end
 
   private
@@ -208,24 +208,24 @@ class AppTest < MetricsTest
   end
 end
 
-class CommandTest < MetricsTest
+class CommandTest < ChartedTest
   def setup
-    @cmd = Metrics::Command.new
+    @cmd = Charted::Command.new
     @cmd.config_loaded = true
-    Metrics::Site.destroy
-    Metrics::Visitor.destroy
-    Metrics::Visit.destroy
-    Metrics::Site.create(:domain => 'localhost')
-    Metrics::Site.create(:domain => 'example.org')
+    Charted::Site.destroy
+    Charted::Visitor.destroy
+    Charted::Visit.destroy
+    Charted::Site.create(:domain => 'localhost')
+    Charted::Site.create(:domain => 'example.org')
   end
 
   def test_site
-    assert_raises(Metrics::ExitError) { @cmd.site = 'nomatch' }
+    assert_raises(Charted::ExitError) { @cmd.site = 'nomatch' }
     assert_equal(['No sites matching "nomatch"'], @cmd.output)
     assert_nil(@cmd.site)
 
     @cmd.output = nil
-    assert_raises(Metrics::ExitError) { @cmd.site = 'l' }
+    assert_raises(Charted::ExitError) { @cmd.site = 'l' }
     assert_equal(['"l" ambiguous: localhost, example.org'], @cmd.output)
 
     @cmd.site = 'local'
@@ -236,7 +236,7 @@ class CommandTest < MetricsTest
   end
 
   def test_dashboard
-    assert_raises(Metrics::ExitError) { @cmd.dashboard }
+    assert_raises(Charted::ExitError) { @cmd.dashboard }
     assert_equal(['Please specify website with --site'], @cmd.output)
     
     @cmd.output = nil

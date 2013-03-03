@@ -1,14 +1,14 @@
 #!/usr/bin/env ruby
 require 'optparse'
-require File.expand_path('lib/metrics', File.dirname(__FILE__))
+require File.expand_path('lib/charted', File.dirname(__FILE__))
 require 'dm-migrations'
 require 'date'
 require 'fileutils'
 
-ENV['METRICS_CMD'] = '1'
+ENV['CHARTED_CMD'] = '1'
 
 ARGV.options do |o|
-  cmd, action = Metrics::Command.new, nil
+  cmd, action = Charted::Command.new, nil
   o.set_summary_indent('  ')
   o.banner = "Usage: #{File.basename($0)} [OPTION]"
   o.on('-d', '--dashboard', 'show dashboard') { action = :dashboard }

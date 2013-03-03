@@ -1,6 +1,6 @@
-require File.expand_path('lib/metrics', File.dirname(__FILE__))
+require File.expand_path('lib/charted', File.dirname(__FILE__))
 
-Metrics.configure(ENV['RACK_ENV'] != 'test') do |c|
+Charted.configure(ENV['RACK_ENV'] != 'test') do |c|
   c.email       'dev@localhost'
   c.db_adapter  'sqlite3'
   c.db_host     'localhost'
@@ -10,6 +10,6 @@ Metrics.configure(ENV['RACK_ENV'] != 'test') do |c|
   c.sites       ['localhost', 'example.org']
 end
 
-if !ENV['METRICS_CMD']
-  map('/metrics') { run Metrics::App } 
+if !ENV['CHARTED_CMD']
+  map('/charted') { run Charted::App } 
 end

@@ -19,7 +19,7 @@ require 'dashline'
 
 DataMapper::Model.raise_on_save_failure = true
 
-module Metrics
+module Charted
   VERSION = '0.0.1'
   GEOIP = GeoIP.new("#{File.dirname(__FILE__)}/../geoip.dat")
 
@@ -163,8 +163,8 @@ module Metrics
       site = Site.first(:domain => request.host)
       halt(404) if site.nil?
 
-      if request.cookies['metrics']
-        visitor = Visitor.get_by_cookie(site, request.cookies['metrics'])
+      if request.cookies['charted']
+        visitor = Visitor.get_by_cookie(site, request.cookies['charted'])
       end
 
       if visitor.nil?
@@ -174,7 +174,7 @@ module Metrics
           :user_agent => request.user_agent,
           :ip_address => request.ip)
         response.set_cookie(
-          'metrics',
+          'charted',
           :value => visitor.cookie,
           :expires => (Date.today + 365*2).to_time)
       end
@@ -189,11 +189,11 @@ module Metrics
 
     error do
       Pony.mail(
-        :to => Metrics.config.email,
-        :from => "metrics@#{Metrics.config.email.split('@')[1..-1].join}",
-        :subject => 'Metrics Error',
+        :to => Charted.config.email,
+        :from => "charted@#{Charted.config.email.split('@')[1..-1].join}",
+        :subject => 'Charted Error',
         :body => request.env['sinatra.error'].to_s
-      ) if Metrics.config.email && self.class.environment == :production
+      ) if Charted.config.email && self.class.environment == :production
     end
   end
 
@@ -219,13 +219,13 @@ module Metrics
       table.separator
       table.max_width(max_width)
       (0..11).each do |delta|
-        date = Metrics.prev_month(Date.today, delta)
+        date = Charted.prev_month(Date.today, delta)
         visits = @site.visits.count(
           :created_at.gte => date,
-          :created_at.lt => Metrics.next_month(date))
+          :created_at.lt => Charted.next_month(date))
         unique = @site.visitors.count(:visits => {
           :created_at.gte => date,
-          :created_at.lt => Metrics.next_month(date)})
+          :created_at.lt => Charted.next_month(date)})
         table.row(format(visits), format(unique), date.strftime('%B %Y'))
         table.align :right, :right, :left
         chart.row date.strftime('%b %Y'), visits
@@ -270,7 +270,7 @@ module Metrics
     def migrate
       load_config
       DataMapper.auto_upgrade!
-      Metrics.config.sites.each do |domain|
+      Charted.config.sites.each do |domain|
         if Site.first(:domain => domain).nil?
           Site.create(:domain => domain)
         end
@@ -293,11 +293,11 @@ module Metrics
     private
     def load_config
       return if @config_loaded
-      file = ENV['METRICS_CONFIG']
+      file = ENV['CHARTED_CONFIG']
       load(file)
       @config_loaded = true
     rescue LoadError
-      sys_exit("METRICS_CONFIG not set, please set to `config.ru` file.")
+      sys_exit("CHARTED_CONFIG not set, please set to `config.ru` file.")
     end
 
     def sys_exit(reason)

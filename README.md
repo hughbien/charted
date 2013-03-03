@@ -1,54 +1,54 @@
 Description
 ===========
 
-Metrics is a minimal web traffic analytics app.  Still under development!
+Charted is a minimal web traffic analytics app.  Still under development!
 
 Installation
 ============
 
-    $ gem install metrics
+    $ gem install charted
 
 Setup a `config.ru` file and run it like any other Sinatra application.
 
     require 'rubygems'
-    require 'metrics'
+    require 'charted'
 
-    Metrics.configure do |c|
+    Charted.configure do |c|
       c.email        'john@mailinator.com'      # production exceptions are sent here
       c.delete_after 365                        # only keep a years worth of data
       c.db_adapter   'mysql'
       c.db_host      'localhost'
       c.db_username  'root'
       c.db_password  'secret'
-      c.db_database  'metrics'
+      c.db_database  'charted'
       c.sites        ['hughbien.com', 'example.com']
     end
 
-    run Metrics::App if !ENV['METRICS_CMD']
+    run Charted::App if !ENV['CHARTED_CMD']
 
 Stick this in your `bashrc` or `zshrc`:
 
-    METRICS_CONFIG='/path/to/config.ru'
+    CHARTED_CONFIG='/path/to/config.ru'
 
 Then initialize the database:
 
-    $ metrics --migrate
+    $ charted --migrate
 
-The app should be mounted to `/metrics` path on your domain.  Then in your app,
+The app should be mounted to `/charted` path on your domain.  Then in your app,
 include the script right before the closing `</body>` tag:
 
-    <script src="/metrics/script.js" async></script>
+    <script src="/charted/script.js" async></script>
 
 If you concatenate your JavaScript, you can generate the `script.js` file and
-add it to your project.  The downside being when you update the metrics gem,
+add it to your project.  The downside being when you update the charted gem,
 you'll also have to remember to update the JavaScript:
 
-    $ metrics --js > /path/to/my/project/public/metrics.js
+    $ charted --js > /path/to/my/project/public/charted.js
 
 Updating
 ========
 
-    $ gem install metrics
+    $ gem install charted
 
 Usage
 =====
@@ -56,8 +56,8 @@ Usage
 The web application is for end users, to get information about your traffic use
 the included command line application.
 
-    $ metrics --help
-    $ metrics --dashboard --site hugh # just needs the first few letters
+    $ charted --help
+    $ charted --dashboard --site hugh # just needs the first few letters
     +-------+--------+--------------------------------------+
     | Total | Unique | Visits                               |
     +-------+--------+--------------------------------------+
@@ -71,14 +71,14 @@ Development
 
 Put this in your `zshrc` or `bashrc`:
 
-    export METRICS_CONFIG="/path/to/metrics/config.ru"
+    export CHARTED_CONFIG="/path/to/charted/config.ru"
 
 Then run:
 
-    $ ./metrics --migrate
+    $ ./charted --migrate
     $ shotgun
 
-Head on over to `http://localhost:9393/metrics/prime.html`.  This is where
+Head on over to `http://localhost:9393/charted/prime.html`.  This is where
 recordings should occur.
 
 Tests are setup to run via `ruby test/*_test.rb` or via `rake`.

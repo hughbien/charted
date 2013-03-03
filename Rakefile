@@ -1,4 +1,4 @@
-require File.expand_path('lib/metrics', File.dirname(__FILE__))
+require File.expand_path('lib/charted', File.dirname(__FILE__))
 require 'rake/testtask'
 require 'dm-migrations'
 
@@ -9,7 +9,7 @@ Rake::TestTask.new do |t|
 end
 
 task :build do
-  `gem build metrics.gemspec`
+  `gem build charted.gemspec`
 end
 
 task :clean do
@@ -17,7 +17,7 @@ task :clean do
 end
 
 task :push => :build do
-  `gem push metrics-#{Metrics::VERSION}.gem`
+  `gem push charted-#{Charted::VERSION}.gem`
 end
 
 task :geoip do

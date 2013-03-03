@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
-  s.name        = 'metrics'
+  s.name        = 'charted'
   s.version     = '0.0.1'
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Hugh Bien']
   s.email       = ['hugh@hughbien.com']
-  s.homepage    = 'https://github.com/hughbien/metrics'
+  s.homepage    = 'https://github.com/hughbien/charted'
   s.summary     = 'Minimal web traffic analytics'
   s.description = 'A Sinatra app for tracking web traffic on multiple sites.'
  
@@ -20,9 +20,9 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest'
  
   s.files         = Dir.glob('*.{md,rb,ru,dat}') +
-                    %w(metrics) +
+                    %w(charted) +
                     Dir.glob('{lib,test}/*.rb')
   s.require_paths = ['lib']
   s.bindir        = '.'
-  s.executables   = ['metrics']
+  s.executables   = ['charted']
 end

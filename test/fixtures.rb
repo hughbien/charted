@@ -1,18 +1,18 @@
-require File.expand_path('../lib/metrics', File.dirname(__FILE__))
+require File.expand_path('../lib/charted', File.dirname(__FILE__))
 require 'date'
 
-module Metrics
+module Charted
   class Fixtures
     def self.load!
-      Metrics::Site.destroy
-      Metrics::Visitor.destroy
-      Metrics::Visit.destroy
-      localhost = Metrics::Site.create(:domain => 'localhost')
-      example = Metrics::Site.create(:domain => 'example.org')
+      Charted::Site.destroy
+      Charted::Visitor.destroy
+      Charted::Visit.destroy
+      localhost = Charted::Site.create(:domain => 'localhost')
+      example = Charted::Site.create(:domain => 'example.org')
 
-      months = (0..11).map { |d| Metrics.prev_month(Date.today, d) }
+      months = (0..11).map { |d| Charted.prev_month(Date.today, d) }
       1000.times do
-        visitor = Metrics::Visitor.create(
+        visitor = Charted::Visitor.create(
           :site => select_rand([localhost, example]),
           :created_at => select_rand(months),
           :resolution => select_rand(%w(1400x900 1280x800 1024x768)),
@@ -27,18 +27,18 @@ module Metrics
             'Mozilla/5.0 (Macintosh; U; PPC Mac OS X; en) AppleWebKit/125.2 (KHTML, like Gecko) Safari/125.8',
             'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.8.1.19) Gecko/20081216 Ubuntu/8.04 (hardy) Firefox/2.0.0.19']))
         (rand(2) + 1).times do |index|
-          Metrics::Visit.create(
+          Charted::Visit.create(
             :visitor => visitor,
-            :created_at => Metrics.next_month(visitor.created_at, select_rand([0, index])),
+            :created_at => Charted.next_month(visitor.created_at, select_rand([0, index])),
             :path => select_rand(%w(/ /page-one/ /page-two/ /page-three/)),
             :title => select_rand(%w(Prime Optimus Alpha Beta Omega)),
             :referrer => select_rand([
-              'http://www.google.com?q=Metrics+Test',
+              'http://www.google.com?q=Charted+Test',
               'http://coverstrap.com',
               'http://news.ycombinator.com',
               'http://example.org']),
             :search_terms => select_rand([
-              'Metrics Keywords',
+              'Charted Keywords',
               'Web Analytics',
               'Command Line Analytics']))
         end
@@ -53,7 +53,7 @@ module Metrics
 end
 
 if __FILE__ == $0
-  ENV['METRICS_CMD'] = '1'
+  ENV['CHARTED_CMD'] = '1'
   load(File.expand_path('../config.ru', File.dirname(__FILE__)))
-  Metrics::Fixtures.load!
+  Charted::Fixtures.load!
 end
