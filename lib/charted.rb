@@ -15,7 +15,7 @@ require 'useragent'
 require 'search_terms'
 require 'terminal-table'
 require 'colorize'
-require 'dashline'
+require 'dashes'
 
 DataMapper::Model.raise_on_save_failure = true
 
@@ -204,14 +204,14 @@ module Charted
     def dashboard
       site_required
       tables = []
-      chart = Dashline::Chart.new
-      chart2 = Dashline::Chart.new
+      chart = Dashes::Chart.new
+      chart2 = Dashes::Chart.new
       max_width = [`tput cols`.to_i / 2, 60].min
       chart.max_width(max_width)
       chart2.max_width(max_width)
       chart.title "Total Visits".colorize(:light_green)
       chart2.title "Unique Visits".colorize(:light_green)
-      table = Dashline::Table.new
+      table = Dashes::Table.new
       table.spacing :min, :min, :max
       table.row('Total'.colorize(:light_blue),
         'Unique'.colorize(:light_blue),
@@ -241,7 +241,7 @@ module Charted
        [:title, 'Pages', :visits],
        [:referrer, 'Referrers', :visits],
        [:search_terms, 'Searches', :visits]].each do |field, column, type|
-        table = Dashline::Table.new
+        table = Dashes::Table.new
         table.max_width(max_width)
         table.spacing :min, :min, :max
         table.row('Total'.colorize(:light_blue),
@@ -261,7 +261,7 @@ module Charted
         tables << table
       end
 
-      grid = Dashline::Grid.new
+      grid = Dashes::Grid.new
       grid.width(`tput cols`.to_i)
       tables.each { |t| grid.add(t) }
       print(grid)
