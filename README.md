@@ -86,14 +86,12 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* dashboard should hide < 5% lines (w/ option)
 * add event tracking
 * add funnel conversion tracking
 * add AB testing
-* add stats summary for AB tests
 * add deletion every N days for fresh data
 * add `--js` option
-* add config for dashboards (what to show/hide, how to order)
+* add config for dashboards (show/hide, ordering)
 * ignore same domain referrers
 * optimize with If-Not-Modified (or use ?timestamp parameter)
 * ignore cookie for developers
