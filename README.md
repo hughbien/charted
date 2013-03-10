@@ -86,20 +86,17 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* clean up `--dashboard` code
-* track RSS subscribers
+* dashboard should hide < 5% lines (w/ option)
 * add event tracking
 * add funnel conversion tracking
 * add AB testing
 * add stats summary for AB tests
-* add deletion via CLI
 * add deletion every N days for fresh data
 * add `--js` option
-* add plugin system to CLI and recordings
 * add config for dashboards (what to show/hide, how to order)
 * ignore same domain referrers
 * optimize with If-Not-Modified (or use ?timestamp parameter)
-* ignore switch for developers
+* ignore cookie for developers
 * deploy task in Rakefile for development
 * add `--sync` option
 

@@ -203,21 +203,22 @@ module Charted
 
     def dashboard
       site_required
-      tables = []
-      chart = Dashes::Chart.new
-      chart2 = Dashes::Chart.new
+      nodes = []
       max_width = [`tput cols`.to_i / 2, 60].min
-      chart.max_width(max_width)
-      chart2.max_width(max_width)
-      chart.title "Total Visits".colorize(:light_green)
-      chart2.title "Unique Visits".colorize(:light_green)
-      table = Dashes::Table.new
-      table.spacing :min, :min, :max
-      table.row('Total'.colorize(:light_blue),
-        'Unique'.colorize(:light_blue),
-        'Visits'.colorize(:light_green))
-      table.separator
-      table.max_width(max_width)
+      chart = Dashes::Chart.new.
+        max_width(max_width).
+        title("Total Visits".colorize(:light_green))
+      chart2 = Dashes::Chart.new.
+        max_width(max_width).
+        title("Unique Visits".colorize(:light_green))
+      table = Dashes::Table.new.
+        max_width(max_width).
+        spacing(:min, :min, :max).
+        align(:right, :right, :left).
+        row('Total'.colorize(:light_blue),
+          'Unique'.colorize(:light_blue),
+          'Visits'.colorize(:light_green)).
+        separator
       (0..11).each do |delta|
         date = Charted.prev_month(Date.today, delta)
         visits = @site.visits.count(
@@ -227,13 +228,10 @@ module Charted
           :created_at.gte => date,
           :created_at.lt => Charted.next_month(date)})
         table.row(format(visits), format(unique), date.strftime('%B %Y'))
-        table.align :right, :right, :left
-        chart.row date.strftime('%b %Y'), visits
-        chart2.row date.strftime('%b %Y'), unique
+        chart.row(date.strftime('%b %Y'), visits)
+        chart2.row(date.strftime('%b %Y'), unique)
       end
-      tables << table
-      tables << chart
-      tables << chart2
+      nodes += [table, chart, chart2]
       [[:browser, 'Browsers', :visitors],
        [:resolution, 'Resolutions', :visitors],
        [:platform, 'Platforms', :visitors],
@@ -241,13 +239,13 @@ module Charted
        [:title, 'Pages', :visits],
        [:referrer, 'Referrers', :visits],
        [:search_terms, 'Searches', :visits]].each do |field, column, type|
-        table = Dashes::Table.new
-        table.max_width(max_width)
-        table.spacing :min, :min, :max
-        table.row('Total'.colorize(:light_blue),
-          '%'.colorize(:light_blue),
-          column.colorize(:light_green))
-        table.separator
+        table = Dashes::Table.new.
+          max_width(max_width).
+          spacing(:min, :min, :max).
+          align(:right, :right, :left).
+          row('Total'.colorize(:light_blue),
+            '%'.colorize(:light_blue),
+            column.colorize(:light_green)).separator
         rows = []
         total = @site.send(type).count(field.not => nil)
         @site.send(type).aggregate(field, :all.count).each do |label, count|
@@ -257,14 +255,9 @@ module Charted
           rows << [format(count), "#{((count / total.to_f) * 100).round}%", label]
         end
         rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
-        table.align :right, :right, :left
-        tables << table
+        nodes << table
       end
-
-      grid = Dashes::Grid.new
-      grid.width(`tput cols`.to_i)
-      tables.each { |t| grid.add(t) }
-      print(grid)
+      print(Dashes::Grid.new.width(`tput cols`.to_i).add(*nodes))
     end
 
     def migrate
