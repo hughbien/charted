@@ -58,6 +58,7 @@ class ModelTest < ChartedTest
     Charted::Visitor.destroy
     Charted::Visit.destroy
     Charted::Event.destroy
+    Charted::Conversion.destroy
   end
 
   def test_create
@@ -75,6 +76,9 @@ class ModelTest < ChartedTest
     event = Charted::Event.create(
       visitor: visitor,
       label: 'User Clicked')
+    conversion = Charted::Conversion.create(
+      visitor: visitor,
+      label: 'User Purchased')
 
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
@@ -91,6 +95,13 @@ class ModelTest < ChartedTest
     assert_equal(site, event.site)
     assert_equal(visitor, event.visitor)
     assert_equal('User Clicked', event.label)
+
+    assert_equal(site, conversion.site)
+    assert_equal(visitor, conversion.visitor)
+    assert_equal('User Purchased', conversion.label)
+    refute(conversion.ended?)
+    conversion.end!
+    assert(conversion.ended?)
   end
 
   def test_unique_identifier

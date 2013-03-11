@@ -167,6 +167,29 @@ module Charted
     validates_presence_of :visitor
   end
 
+  class Conversion
+    include DataMapper::Resource
+
+    property :id, Serial
+    property :label, String, :required => true
+    property :created_at, DateTime
+    property :ended_at, DateTime
+
+    belongs_to :visitor
+    has 1, :site, :through => :visitor
+
+    validates_presence_of :visitor
+
+    def ended?
+      !!ended_at
+    end
+
+    def end!
+      self.ended_at = DateTime.now
+      self.save
+    end
+  end
+
   DataMapper.finalize
 
   class App < Sinatra::Base
