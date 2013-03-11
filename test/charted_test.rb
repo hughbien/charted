@@ -57,20 +57,25 @@ class ModelTest < ChartedTest
     Charted::Site.destroy
     Charted::Visitor.destroy
     Charted::Visit.destroy
+    Charted::Event.destroy
   end
 
   def test_create
-    site = Charted::Site.create(:domain => 'localhost')
+    site = Charted::Site.create(domain: 'localhost')
     visitor = Charted::Visitor.create(
-      :site => site,
-      :ip_address => '67.188.42.140',
-      :user_agent =>
+      site: site,
+      ip_address: '67.188.42.140',
+      user_agent:
         'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1')
     visit = Charted::Visit.create(
-      :visitor => visitor,
-      :path => '/',
-      :title => 'Prime',
-      :referrer => 'http://www.google.com?q=Charted+Test')
+      visitor: visitor,
+      path: '/',
+      title: 'Prime',
+      referrer: 'http://www.google.com?q=Charted+Test')
+    event = Charted::Event.create(
+      visitor: visitor,
+      label: 'User Clicked')
+
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
     assert_equal('Charted Test', visit.search_terms)
@@ -82,6 +87,10 @@ class ModelTest < ChartedTest
 
     assert_equal(visitor, Charted::Visitor.get_by_cookie(site, visitor.cookie))
     assert_nil(Charted::Visitor.get_by_cookie(site, "#{visitor.id}-zzzzz"))
+
+    assert_equal(site, event.site)
+    assert_equal(visitor, event.visitor)
+    assert_equal('User Clicked', event.label)
   end
 
   def test_unique_identifier

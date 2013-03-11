@@ -87,7 +87,7 @@ TODO
 ====
 
 * add event tracking
-* add funnel conversion tracking
+* add conversion tracking
 * add AB testing
 * add deletion every N days for fresh data
 * add `--js` option
@@ -96,7 +96,6 @@ TODO
 * optimize with If-Not-Modified (or use ?timestamp parameter)
 * ignore cookie for developers
 * deploy task in Rakefile for development
-* add `--sync` option
 
 License
 =======

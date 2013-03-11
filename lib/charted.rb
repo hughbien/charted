@@ -154,6 +154,19 @@ module Charted
     end
   end
 
+  class Event
+    include DataMapper::Resource
+
+    property :id, Serial
+    property :label, String, :required => true
+    property :created_at, DateTime
+
+    belongs_to :visitor
+    has 1, :site, :through => :visitor
+
+    validates_presence_of :visitor
+  end
+
   DataMapper.finalize
 
   class App < Sinatra::Base
