@@ -90,6 +90,8 @@ module Charted
 
     belongs_to :site
     has n, :visits
+    has n, :events
+    has n, :conversions
 
     validates_presence_of :site
 
@@ -117,6 +119,16 @@ module Charted
       self.country = name
     rescue SocketError
       # invalid IP address, skip setting country
+    end
+
+    def start_conversion(label)
+      conversions.first(label: label) || self.conversions.create(label: label)
+    end
+
+    def end_conversion(label)
+      conv = start_conversion(label)
+      conv.end!
+      conv
     end
 
     def self.get_by_cookie(site, cookie)
@@ -204,8 +216,7 @@ module Charted
       end
 
       if visitor.nil?
-        visitor = Visitor.create(
-          :site => site,
+        visitor = site.visitors.create(
           :resolution => params[:resolution],
           :user_agent => request.user_agent,
           :ip_address => request.ip)
@@ -215,8 +226,7 @@ module Charted
           :expires => (Date.today + 365*2).to_time)
       end
 
-      visit = Visit.create(
-        :visitor => visitor,
+      visit = visitor.visits.create(
         :path => params[:path],
         :title => params[:title],
         :referrer => params[:referrer])

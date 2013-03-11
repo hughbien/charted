@@ -73,12 +73,6 @@ class ModelTest < ChartedTest
       path: '/',
       title: 'Prime',
       referrer: 'http://www.google.com?q=Charted+Test')
-    event = Charted::Event.create(
-      visitor: visitor,
-      label: 'User Clicked')
-    conversion = Charted::Conversion.create(
-      visitor: visitor,
-      label: 'User Purchased')
 
     assert_equal(site, visit.site)
     assert_equal([visit], site.visits)
@@ -92,16 +86,24 @@ class ModelTest < ChartedTest
     assert_equal(visitor, Charted::Visitor.get_by_cookie(site, visitor.cookie))
     assert_nil(Charted::Visitor.get_by_cookie(site, "#{visitor.id}-zzzzz"))
 
+    event = visitor.events.create(label: 'User Clicked')
+    conversion = visitor.start_conversion('User Purchased')
+    visitor.start_conversion('User Purchased') # no effect
+
     assert_equal(site, event.site)
     assert_equal(visitor, event.visitor)
     assert_equal('User Clicked', event.label)
 
+    assert_equal(1, visitor.conversions.length)
     assert_equal(site, conversion.site)
     assert_equal(visitor, conversion.visitor)
     assert_equal('User Purchased', conversion.label)
     refute(conversion.ended?)
-    conversion.end!
+    visitor.end_conversion('User Purchased')
     assert(conversion.ended?)
+
+    visitor.end_conversion('Nonexistant')
+    assert_equal(2, visitor.conversions.length)
   end
 
   def test_unique_identifier
