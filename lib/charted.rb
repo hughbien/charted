@@ -65,6 +65,17 @@ module Charted
                 :db_adapter, :db_host, :db_username, :db_password, :db_database
   end
 
+  module Endable
+    def ended?
+      !!ended_at
+    end
+
+    def end!
+      self.ended_at = DateTime.now
+      self.save
+    end
+  end
+
   class Site
     include DataMapper::Resource
 
@@ -97,6 +108,7 @@ module Charted
     has n, :visits
     has n, :events
     has n, :conversions
+    has n, :experiments
 
     validates_presence_of :site
 
@@ -134,6 +146,22 @@ module Charted
       conv = start_conversion(label)
       conv.end!
       conv
+    end
+
+    def start_experiment(label, bucket)
+      exp = experiments.first(label: label)
+      if exp
+        exp.update(bucket: bucket) if exp.bucket != bucket
+        exp
+      else
+        self.experiments.create(label: label, bucket: bucket)
+      end
+    end
+
+    def end_experiment(label)
+      exp = experiments.first(label: label)
+      exp.end! if exp
+      exp
     end
 
     def self.generate_secret
@@ -179,6 +207,7 @@ module Charted
 
   class Conversion
     include DataMapper::Resource
+    include Endable
 
     property :id, Serial
     property :label, String, :required => true
@@ -189,15 +218,22 @@ module Charted
     has 1, :site, :through => :visitor
 
     validates_presence_of :visitor
+  end
 
-    def ended?
-      !!ended_at
-    end
+  class Experiment
+    include DataMapper::Resource
+    include Endable
 
-    def end!
-      self.ended_at = DateTime.now
-      self.save
-    end
+    property :id, Serial
+    property :label, String, :required => true
+    property :bucket, String, :required => true
+    property :created_at, DateTime
+    property :ended_at, DateTime
+
+    belongs_to :visitor
+    has 1, :site, :through => :visitor
+
+    validates_presence_of :visitor
   end
 
   DataMapper.finalize
@@ -221,7 +257,7 @@ module Charted
           expires: (Date.today + 365*2).to_time)
       end
 
-      visit = visitor.visits.create(
+      visitor.visits.create(
         path: params[:path],
         title: params[:title],
         referrer: params[:referrer])

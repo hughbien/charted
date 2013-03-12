@@ -59,6 +59,7 @@ class ModelTest < ChartedTest
     Charted::Visit.destroy
     Charted::Event.destroy
     Charted::Conversion.destroy
+    Charted::Experiment.destroy
   end
 
   def test_create
@@ -89,13 +90,12 @@ class ModelTest < ChartedTest
     assert_nil(site.visitor_with_cookie(nil))
 
     event = visitor.events.create(label: 'User Clicked')
-    conversion = visitor.start_conversion('User Purchased')
-    visitor.start_conversion('User Purchased') # no effect
-
     assert_equal(site, event.site)
     assert_equal(visitor, event.visitor)
     assert_equal('User Clicked', event.label)
 
+    conversion = visitor.start_conversion('User Purchased')
+    visitor.start_conversion('User Purchased') # no effect
     assert_equal(1, visitor.conversions.length)
     assert_equal(site, conversion.site)
     assert_equal(visitor, conversion.visitor)
@@ -103,9 +103,22 @@ class ModelTest < ChartedTest
     refute(conversion.ended?)
     visitor.end_conversion('User Purchased')
     assert(conversion.ended?)
-
     visitor.end_conversion('Nonexistant')
     assert_equal(2, visitor.conversions.length)
+
+    experiment = visitor.start_experiment('User Next', 'A')
+    visitor.start_experiment('User Next', 'A') # no effect
+    visitor.start_experiment('User Next', 'B') # changes bucket
+    assert_equal(1, visitor.experiments.length)
+    assert_equal(site, experiment.site)
+    assert_equal(visitor, experiment.visitor)
+    assert_equal('User Next', experiment.label)
+    assert_equal('B', experiment.bucket)
+    refute(experiment.ended?)
+    visitor.end_experiment('User Next')
+    assert(experiment.ended?)
+    visitor.end_experiment('Nonexistant') # no effect
+    assert_equal(1, visitor.experiments.length)
   end
 
   def test_unique_identifier
