@@ -83,8 +83,10 @@ class ModelTest < ChartedTest
     assert_equal('Firefox', visitor.browser)
     assert_equal('14.0.1', visitor.browser_version)
 
-    assert_equal(visitor, Charted::Visitor.get_by_cookie(site, visitor.cookie))
-    assert_nil(Charted::Visitor.get_by_cookie(site, "#{visitor.id}-zzzzz"))
+    assert_equal(visitor, site.visitor_with_cookie(visitor.cookie))
+    assert_nil(site.visitor_with_cookie("#{visitor.id}-zzzzz"))
+    assert_nil(site.visitor_with_cookie("0-zzzzz"))
+    assert_nil(site.visitor_with_cookie(nil))
 
     event = visitor.events.create(label: 'User Clicked')
     conversion = visitor.start_conversion('User Purchased')

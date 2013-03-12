@@ -74,6 +74,11 @@ module Charted
 
     has n, :visitors
     has n, :visits, :through => :visitors
+
+    def visitor_with_cookie(cookie)
+      visitor = self.visitors.get(cookie.to_s.split('-').first)
+      visitor && visitor.cookie == cookie ? visitor : nil
+    end
   end
 
   class Visitor
@@ -129,13 +134,6 @@ module Charted
       conv = start_conversion(label)
       conv.end!
       conv
-    end
-
-    def self.get_by_cookie(site, cookie)
-      visitor = Visitor.get(cookie.to_s.split('-').first)
-      visitor && visitor.site == site && visitor.cookie == cookie ?
-        visitor :
-        nil
     end
 
     def self.generate_secret
@@ -210,35 +208,32 @@ module Charted
     get '/' do
       site = Site.first(:domain => request.host)
       halt(404) if site.nil?
-
-      if request.cookies['charted']
-        visitor = Visitor.get_by_cookie(site, request.cookies['charted'])
-      end
+      visitor = site.visitor_with_cookie(request.cookies['charted'])
 
       if visitor.nil?
         visitor = site.visitors.create(
-          :resolution => params[:resolution],
-          :user_agent => request.user_agent,
-          :ip_address => request.ip)
+          resolution: params[:resolution],
+          user_agent: request.user_agent,
+          ip_address: request.ip)
         response.set_cookie(
           'charted',
-          :value => visitor.cookie,
-          :expires => (Date.today + 365*2).to_time)
+          value: visitor.cookie,
+          expires: (Date.today + 365*2).to_time)
       end
 
       visit = visitor.visits.create(
-        :path => params[:path],
-        :title => params[:title],
-        :referrer => params[:referrer])
+        path: params[:path],
+        title: params[:title],
+        referrer: params[:referrer])
       '/**/'
     end
 
     error do
       Pony.mail(
-        :to => Charted.config.email,
-        :from => "charted@#{Charted.config.email.split('@')[1..-1].join}",
-        :subject => 'Charted Error',
-        :body => request.env['sinatra.error'].to_s
+        to: Charted.config.email,
+        from: "charted@#{Charted.config.email.split('@')[1..-1].join}",
+        subject: 'Charted Error',
+        body: request.env['sinatra.error'].to_s
       ) if Charted.config.email && self.class.environment == :production
     end
   end
