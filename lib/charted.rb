@@ -241,27 +241,34 @@ module Charted
   class App < Sinatra::Base
     set :logging, true
 
-    get '/' do
-      site = Site.first(:domain => request.host)
-      halt(404) if site.nil?
-      visitor = site.visitor_with_cookie(request.cookies['charted'])
+    before do
+      @site = Site.first(domain: request.host)
+      halt(404) if @site.nil?
+      @visitor = @site.visitor_with_cookie(request.cookies['charted'])
+    end
 
-      if visitor.nil?
-        visitor = site.visitors.create(
+    get '/' do
+      if @visitor.nil?
+        @visitor = @site.visitors.create(
           resolution: params[:resolution],
           user_agent: request.user_agent,
           ip_address: request.ip)
         response.set_cookie(
           'charted',
-          value: visitor.cookie,
+          value: @visitor.cookie,
           expires: (Date.today + 365*2).to_time)
       end
 
-      visitor.visits.create(
+      @visitor.visits.create(
         path: params[:path],
         title: params[:title],
         referrer: params[:referrer])
       '/**/'
+    end
+
+    get '/event' do
+      halt(404) if @visitor.nil?
+      @visitor.events.create(label: params[:event])
     end
 
     error do

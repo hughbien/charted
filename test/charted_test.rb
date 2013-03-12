@@ -168,6 +168,9 @@ class AppTest < ChartedTest
     Charted::Site.destroy
     Charted::Visitor.destroy
     Charted::Visit.destroy
+    Charted::Event.destroy
+    Charted::Conversion.destroy
+    Charted::Experiment.destroy
     clear_cookies
 
     @site = Charted::Site.create(:domain => 'example.org')
@@ -237,6 +240,22 @@ class AppTest < ChartedTest
     assert_equal(2, Charted::Visitor.count)
     assert_equal(2, Charted::Visit.count)
     refute_equal(visitor.cookie, rack_mock_session.cookie_jar['charted'])
+  end
+
+  def test_events # TODO: use correct HTTP methods?
+    get '/charted/event', event: 'Event Label'
+    assert_equal(404, last_response.status)
+
+    visitor = @site.visitors.create
+    set_cookie("charted=#{visitor.cookie}")
+    get '/charted/event', event: 'Event Label'
+    assert(last_response.ok?)
+    assert_equal(1, Charted::Event.count)
+
+    event = Charted::Event.first
+    assert_equal(@site, event.site)
+    assert_equal(visitor, event.visitor)
+    assert_equal('Event Label', event.label)
   end
 
   private
