@@ -96,6 +96,7 @@ TODO
 * optimize with If-Not-Modified (or use ?timestamp parameter)
 * ignore cookie for developers
 * deploy task in Rakefile for development
+* consider indexes on created_at, *
 
 License
 =======

@@ -258,6 +258,29 @@ class AppTest < ChartedTest
     assert_equal('Event Label', event.label)
   end
 
+  def test_conversions
+    visitor = @site.visitors.create
+    set_cookie("charted=#{visitor.cookie}")
+    get '/charted', @params.merge(conversions: 'Logo Clicked;Button Clicked'), @env
+    assert(last_response.ok?)
+    assert_equal(2, Charted::Conversion.count)
+
+    logo = visitor.conversions.first(label: 'Logo Clicked')
+    button = visitor.conversions.first(label: 'Button Clicked')
+    refute(logo.ended?)
+    refute(button.ended?)
+
+    get '/charted/conversion', conversion: 'Logo Clicked'
+    assert(last_response.ok?)
+    logo.reload
+    assert(logo.ended?)
+
+    get '/charted/conversion', conversion: 'Button Clicked'
+    assert(last_response.ok?)
+    button.reload
+    assert(button.ended?)
+  end
+
   private
   def app
     @app ||= Rack::Server.new.app

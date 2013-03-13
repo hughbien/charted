@@ -263,12 +263,20 @@ module Charted
         path: params[:path],
         title: params[:title],
         referrer: params[:referrer])
+      params[:conversions].to_s.split(';').map(&:strip).each do |label|
+        @visitor.start_conversion(label)
+      end if params[:conversions]
       '/**/'
     end
 
     get '/event' do
       halt(404) if @visitor.nil?
       @visitor.events.create(label: params[:event])
+    end
+
+    get '/conversion' do
+      halt(404) if @visitor.nil?
+      @visitor.end_conversion(params[:conversion])
     end
 
     error do
