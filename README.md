@@ -86,9 +86,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* add event tracking
-* add conversion tracking
-* add AB testing
 * add deletion every N days for fresh data
 * add `--js` option
 * add config for dashboards (show/hide, ordering)

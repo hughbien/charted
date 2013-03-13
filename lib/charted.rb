@@ -85,6 +85,9 @@ module Charted
 
     has n, :visitors
     has n, :visits, :through => :visitors
+    has n, :events, :through => :visitors
+    has n, :conversions, :through => :visitors
+    has n, :experiments, :through => :visitors
 
     def visitor_with_cookie(cookie)
       visitor = self.visitors.get(cookie.to_s.split('-').first)
@@ -355,6 +358,51 @@ module Charted
         rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
         nodes << table
       end
+      table = Dashes::Table.new.
+        max_width(max_width).
+        spacing(:min, :min, :max).
+        align(:right, :right, :left).
+        row('Total'.colorize(:light_blue),
+          'Unique'.colorize(:light_blue), 
+          'Events'.colorize(:light_green)).separator
+      rows = []
+      @site.events.aggregate(:label, :all.count).each do |label, count|
+        unique = @site.visitors.count(:events => {label: label})
+        rows << [format(count), format(unique), label]
+      end
+      rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+      nodes << table
+
+      table = Dashes::Table.new.
+        max_width(max_width).
+        spacing(:min, :min, :max).
+        align(:right, :right, :left).
+        row('Start'.colorize(:light_blue),
+          'End'.colorize(:light_blue), 
+          'Conversions'.colorize(:light_green)).separator
+      rows = []
+      @site.conversions.aggregate(:label, :all.count).each do |label, count|
+        ended = @site.conversions.count(label: label, :ended_at.not => nil)
+        rows << [format(count), format(ended), label]
+      end
+      rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+      nodes << table
+
+      table = Dashes::Table.new.
+        max_width(max_width).
+        spacing(:min, :min, :max).
+        align(:right, :right, :left).
+        row('Start'.colorize(:light_blue),
+          'End'.colorize(:light_blue), 
+          'Experiments'.colorize(:light_green)).separator
+      rows = []
+      @site.experiments.aggregate(:label, :bucket, :all.count).each do |label, bucket, count|
+        ended = @site.experiments.count(label: label, bucket: bucket, :ended_at.not => nil)
+        rows << [format(count), format(ended), "#{label}: #{bucket}"]
+      end
+      rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+      nodes << table
+
       print(Dashes::Grid.new.width(`tput cols`.to_i).add(*nodes))
     end
 
