@@ -103,6 +103,7 @@ module Charted
     property :browser, String
     property :browser_version, String
     property :country, String
+    property :bucket, Integer
 
     belongs_to :site
     has n, :visits
@@ -118,7 +119,7 @@ module Charted
     end
 
     def cookie
-      "#{self.id}-#{self.secret}"
+      "#{self.id}-#{self.bucket}-#{self.secret}"
     end
 
     def user_agent=(user_agent)
@@ -260,7 +261,8 @@ module Charted
         @visitor = @site.visitors.create(
           resolution: params[:resolution],
           user_agent: request.user_agent,
-          ip_address: request.ip)
+          ip_address: request.ip,
+          bucket: params[:bucket])
         response.set_cookie(
           'charted',
           value: @visitor.cookie,

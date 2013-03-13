@@ -13,7 +13,7 @@ var Charted = {
     var val = document.cookie.match(new RegExp("(?:^|;) *charted=([^;]*)"));
     if (val) {
       val = this.decode(val[1]).split("&");
-      return val;
+      return val[0];
     }
     return null;
   },
@@ -22,6 +22,9 @@ var Charted = {
   },
   decode: function(encoded) {
     return decodeURIComponent(encoded.replace("+", "%20"));
+  },
+  normalize: function(str) {
+    return str.toLowerCase().replace(' ', '-').replace(/\W/g, '');
   },
   events: function() {
     var str = [];
@@ -38,6 +41,10 @@ var Charted = {
     this.send(this.RECORD_URL, "goals=" + encodeURIComponent(str.join(";")));
   },
   init: function() {
+    var cookie = this.cookie();
+    var bucketNum = cookie ?
+      parseInt(cookie.split("-")[1]) :
+      Math.floor(Math.random() * 10);
     var convQuery = "";
     var conversions = document.body.getAttribute("data-conversions");
     if (conversions) {
@@ -52,8 +59,11 @@ var Charted = {
         var experiment = experiments[i].split(":");
         var label = this.strip(experiment[0]);
         var buckets = experiment[1].split(",");
-        var bucket = buckets[Math.floor(Math.random() * buckets.length)];
+        var bucket = buckets[bucketNum % buckets.length];
         bucket = this.strip(bucket);
+
+        document.body.className +=
+          (this.normalize(label) + "-" + this.normalize(bucket));
         expQuery += encodeURIComponent(label + ":" + bucket + ";");
       }
     }
@@ -63,6 +73,7 @@ var Charted = {
       "&title=" + encodeURIComponent(document.title) +
       "&referrer=" + encodeURIComponent(document.referrer) +
       "&resolution=" + encodeURIComponent(screen.width+"x"+screen.height) +
+      "&bucket=" + bucketNum +
       convQuery + expQuery);
   }
 };

@@ -66,6 +66,7 @@ class ModelTest < ChartedTest
     site = Charted::Site.create(domain: 'localhost')
     visitor = Charted::Visitor.create(
       site: site,
+      bucket: 0,
       ip_address: '67.188.42.140',
       user_agent:
         'Mozilla/5.0 (X11; Linux i686; rv:14.0) Gecko/20100101 Firefox/14.0.1')
@@ -79,7 +80,7 @@ class ModelTest < ChartedTest
     assert_equal([visit], site.visits)
     assert_equal('Charted Test', visit.search_terms)
     assert_match(/^\w{5}$/, visitor.secret)
-    assert_equal("#{visitor.id}-#{visitor.secret}", visitor.cookie)
+    assert_equal("#{visitor.id}-#{visitor.bucket}-#{visitor.secret}", visitor.cookie)
     assert_equal('Linux', visitor.platform)
     assert_equal('Firefox', visitor.browser)
     assert_equal('14.0.1', visitor.browser_version)
@@ -175,6 +176,7 @@ class AppTest < ChartedTest
 
     @site = Charted::Site.create(:domain => 'example.org')
     @params = {
+      :bucket => 1,
       :path => '/',
       :title => 'Prime',
       :referrer => 'localhost',
