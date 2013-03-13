@@ -2,20 +2,27 @@ var Charted = {
   URL: "/charted/",
   RECORD_URL: "/charted/record",
   send: function(url, queryString) {
+    if (this.cookie("chartedignore")) { return; }
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.async = true;
     script.src = url + "?" + queryString;
     document.getElementsByTagName("head")[0].appendChild(script);
   },
-  cookie: function() {
+  cookie: function(name) {
     var obj = {};
-    var val = document.cookie.match(new RegExp("(?:^|;) *charted=([^;]*)"));
+    var val = document.cookie.match(new RegExp("(?:^|;) *"+name+"=([^;]*)"));
     if (val) {
       val = this.decode(val[1]).split("&");
       return val[0];
     }
     return null;
+  },
+  ignore: function() {
+    var date = new Date();
+    date.setTime(date.getTime()+(2*365*24*60*60*1000));
+    var expires = "; expires="+date.toGMTString();
+    document.cookie = "chartedignore=1"+expires+"; path=/";
   },
   strip: function(str) {
     return String(str).replace(/^\s+|\s+$/g, '');
@@ -41,7 +48,7 @@ var Charted = {
     this.send(this.RECORD_URL, "goals=" + encodeURIComponent(str.join(";")));
   },
   init: function() {
-    var cookie = this.cookie();
+    var cookie = this.cookie("charted");
     var bucketNum = cookie ?
       parseInt(cookie.split("-")[1]) :
       Math.floor(Math.random() * 10);

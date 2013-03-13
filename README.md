@@ -86,9 +86,7 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* ignore cookie for developers
 * deploy task in Rakefile for development
-* consider indexes on created_at, *
 * hide empty tables
 * add date range option
 
