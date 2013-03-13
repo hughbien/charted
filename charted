@@ -13,6 +13,7 @@ ARGV.options do |o|
   o.banner = "Usage: #{File.basename($0)} [OPTION]"
   o.on('-d', '--dashboard', 'show dashboard') { action = :dashboard }
   o.on('-h', '--help', 'show this help message') { puts o; exit }
+  o.on('-j', '--js', 'output js code') { action = :js }
   o.on('-m', '--migrate', 'migrates database') { cmd.migrate; exit }
   o.on('-s', '--site domain', 'set site') { |site| cmd.site = site }
   o.parse!

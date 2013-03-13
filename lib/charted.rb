@@ -22,6 +22,7 @@ DataMapper::Model.raise_on_save_failure = true
 module Charted
   VERSION = '0.0.1'
   GEOIP = GeoIP.new("#{File.dirname(__FILE__)}/../geoip.dat")
+  JS_FILE = "#{File.dirname(__FILE__)}/../public/charted/script.js"
 
   def self.configure(setup_db=true)
     yield self.config
@@ -404,6 +405,10 @@ module Charted
       nodes << table
 
       print(Dashes::Grid.new.width(`tput cols`.to_i).add(*nodes))
+    end
+
+    def js
+      print(File.read(JS_FILE))
     end
 
     def migrate

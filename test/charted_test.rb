@@ -350,6 +350,12 @@ class CommandTest < ChartedTest
     @cmd.dashboard
   end
 
+  def test_js
+    @cmd.output = nil
+    @cmd.js
+    assert_match("var Charted", @cmd.output[0])
+  end
+
   def test_format
     assert_equal('-10,200', @cmd.send(:format, -10200))
     assert_equal('-1', @cmd.send(:format, -1))

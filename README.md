@@ -87,7 +87,6 @@ TODO
 ====
 
 * add deletion every N days for fresh data
-* add `--js` option
 * add config for dashboards (show/hide, ordering)
 * ignore same domain referrers
 * optimize with If-Not-Modified (or use ?timestamp parameter)
