@@ -150,10 +150,6 @@ module Charted
       end
     end
 
-    def end_conversions(labels)
-      start_conversions(labels).each(&:end!)
-    end
-
     def start_experiments(labels) # label:bucket;...
       labels.to_s.split(';').map do |str|
         label, bucket = str.split(':', 2).map(&:strip)
@@ -167,10 +163,12 @@ module Charted
       end
     end
 
-    def end_experiments(labels)
+    def end_goals(labels)
       labels.to_s.split(';').map(&:strip).each do |label|
         exp = experiments.first(label: label)
         exp.end! if exp
+        conv = conversions.first(label: label)
+        conv.end! if conv
       end
     end
 
@@ -281,8 +279,7 @@ module Charted
     get '/record' do
       halt(404) if @visitor.nil?
       @visitor.make_events(params[:events])
-      @visitor.end_conversions(params[:conversions])
-      @visitor.end_experiments(params[:experiments])
+      @visitor.end_goals(params[:goals])
       '/**/'
     end
 

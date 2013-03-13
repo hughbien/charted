@@ -101,10 +101,10 @@ class ModelTest < ChartedTest
     assert_equal(visitor, conversion.visitor)
     assert_equal('User Purchased', conversion.label)
     refute(conversion.ended?)
-    visitor.end_conversions('User Purchased')
+    visitor.end_goals('User Purchased')
     assert(conversion.ended?)
-    visitor.end_conversions('Nonexistant')
-    assert_equal(3, visitor.conversions.length)
+    visitor.end_goals('Nonexistant') # no effect
+    assert_equal(2, visitor.conversions.length)
 
     experiment = visitor.start_experiments('User Next:A').first
     visitor.start_experiments('User Next:A') # no effect
@@ -115,9 +115,9 @@ class ModelTest < ChartedTest
     assert_equal('User Next', experiment.label)
     assert_equal('B', experiment.bucket)
     refute(experiment.ended?)
-    visitor.end_experiments('User Next')
+    visitor.end_goals('User Next')
     assert(experiment.ended?)
-    visitor.end_experiments('Nonexistant') # no effect
+    visitor.end_goals('Nonexistant') # no effect
     assert_equal(1, visitor.experiments.length)
   end
 
@@ -274,7 +274,7 @@ class AppTest < ChartedTest
     refute(logo.ended?)
     refute(button.ended?)
 
-    get '/charted/record', conversions: 'Logo Clicked;Button Clicked'
+    get '/charted/record', goals: 'Logo Clicked;Button Clicked'
     assert(last_response.ok?)
     logo.reload
     button.reload
@@ -298,7 +298,7 @@ class AppTest < ChartedTest
     assert_equal('B', button.bucket)
     refute(button.ended?)
 
-    get '/charted/record', experiments: 'Logo;Button'
+    get '/charted/record', goals: 'Logo;Button'
     assert(last_response.ok?)
     logo.reload
     button.reload
