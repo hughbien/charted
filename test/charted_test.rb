@@ -321,6 +321,9 @@ class CommandTest < ChartedTest
     Charted::Site.destroy
     Charted::Visitor.destroy
     Charted::Visit.destroy
+    Charted::Event.destroy
+    Charted::Conversion.destroy
+    Charted::Experiment.destroy
     Charted::Site.create(:domain => 'localhost')
     Charted::Site.create(:domain => 'example.org')
   end
@@ -339,6 +342,27 @@ class CommandTest < ChartedTest
 
     @cmd.site = 'ample'
     assert_equal('example.org', @cmd.site.domain)
+  end
+
+  def test_clean
+    site = Charted::Site.first(domain: 'localhost')
+    visitor = site.visitors.create
+    visitor.events.create(label: 'Label')
+    visitor.conversions.create(label: 'Label')
+    visitor.experiments.create(label: 'Label', bucket: 'A')
+    @cmd.output = nil
+    @cmd.clean
+    visitor.reload
+    assert_equal(1, visitor.events.size)
+    assert_equal(1, visitor.conversions.size)
+    assert_equal(1, visitor.experiments.size)
+
+    @cmd.output = nil
+    @cmd.clean('Label')
+    visitor.reload
+    assert_equal(0, visitor.events.size)
+    assert_equal(0, visitor.conversions.size)
+    assert_equal(0, visitor.experiments.size)
   end
 
   def test_dashboard

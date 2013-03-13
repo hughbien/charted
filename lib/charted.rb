@@ -13,7 +13,6 @@ require 'geoip'
 require 'pony'
 require 'useragent'
 require 'search_terms'
-require 'terminal-table'
 require 'colorize'
 require 'dashes'
 
@@ -302,6 +301,29 @@ module Charted
   class Command
     attr_accessor :config_loaded, :output
     attr_reader :site
+
+    def clean(label=nil)
+      load_config
+      sys_exit("Please set 'delete_after' config.") if Charted.config.delete_after.nil?
+
+      threshold = Date.today - Charted.config.delete_after
+      Visit.all(:created_at.lt => threshold).destroy
+      Event.all(:created_at.lt => threshold).destroy
+      Conversion.all(:created_at.lt => threshold).destroy
+      Experiment.all(:created_at.lt => threshold).destroy
+      Visitor.all(:created_at.lt => threshold).each do |visitor|
+        visitor.destroy if visitor.visits.count == 0 &&
+          visitor.events.count == 0 &&
+          visitor.conversions.count == 0 &&
+          visitor.experiments.count == 0
+      end
+
+      if label
+        Event.all(label: label).destroy
+        Conversion.all(label: label).destroy
+        Experiment.all(label: label).destroy
+      end
+    end
 
     def dashboard
       site_required

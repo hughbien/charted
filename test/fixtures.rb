@@ -11,7 +11,7 @@ module Charted
       example = Charted::Site.create(:domain => 'example.org')
 
       months = (0..11).map { |d| Charted.prev_month(Date.today, d) }
-      1000.times do
+      200.times do
         visitor = Charted::Visitor.create(
           :site => select_rand([localhost, example]),
           :created_at => select_rand(months),

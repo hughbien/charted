@@ -86,13 +86,13 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* add deletion every N days for fresh data
-* add config for dashboards (show/hide, ordering)
 * ignore same domain referrers
 * optimize with If-Not-Modified (or use ?timestamp parameter)
 * ignore cookie for developers
 * deploy task in Rakefile for development
 * consider indexes on created_at, *
+* hide empty tables
+* add date range option
 
 License
 =======
