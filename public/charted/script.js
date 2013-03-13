@@ -1,10 +1,11 @@
 var Charted = {
   URL: "/charted/",
-  send: function(queryString) {
+  RECORD_URL: "/charted/record/",
+  send: function(url, queryString) {
     var script = document.createElement("script");
     script.type = "text/javascript";
     script.async = true;
-    script.src = this.URL + "?" + queryString;
+    script.src = url + "?" + queryString;
     document.getElementsByTagName("head")[0].appendChild(script);
   },
   cookie: function() {
@@ -18,9 +19,17 @@ var Charted = {
   },
   decode: function(encoded) {
     return decodeURIComponent(encoded.replace("+", "%20"));
+  },
+  events: function() {
+    var str = [];
+    for (var i = 0; i < arguments.length; i++) {
+      str.push(arguments[i]);
+    }
+    this.send(this.RECORD_URL, "events=" + encodeURIComponent(str.join(";")));
   }
 };
 Charted.send(
+  Charted.URL,
   "path=" + encodeURIComponent(window.location.pathname) +
   "&title=" + encodeURIComponent(document.title) +
   "&referrer=" + encodeURIComponent(document.referrer) +
