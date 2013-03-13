@@ -1,6 +1,6 @@
 var Charted = {
   URL: "/charted/",
-  RECORD_URL: "/charted/record/",
+  RECORD_URL: "/charted/record",
   send: function(url, queryString) {
     var script = document.createElement("script");
     script.type = "text/javascript";
@@ -16,6 +16,9 @@ var Charted = {
       return val;
     }
     return null;
+  },
+  strip: function(str) {
+    return String(str).replace(/^\s+|\s+$/g, '');
   },
   decode: function(encoded) {
     return decodeURIComponent(encoded.replace("+", "%20"));
@@ -40,13 +43,27 @@ var Charted = {
     if (conversions) {
       convQuery = "&conversions=" + encodeURIComponent(conversions);
     }
+    var expQuery = "";
+    var experiments = document.body.getAttribute("data-experiments");
+    if (experiments) {
+      expQuery = "&experiments="
+      experiments = experiments.split(";");
+      for (var i = 0; i < experiments.length; experiments++) {
+        var experiment = experiments[i].split(":");
+        var label = this.strip(experiment[0]);
+        var buckets = experiment[1].split(",");
+        var bucket = buckets[Math.floor(Math.random() * buckets.length)];
+        bucket = this.strip(bucket);
+        expQuery += encodeURIComponent(label + ":" + bucket + ";");
+      }
+    }
     Charted.send(
       Charted.URL,
       "path=" + encodeURIComponent(window.location.pathname) +
       "&title=" + encodeURIComponent(document.title) +
       "&referrer=" + encodeURIComponent(document.referrer) +
       "&resolution=" + encodeURIComponent(screen.width+"x"+screen.height) +
-      convQuery);
+      convQuery + expQuery);
   }
 };
 Charted.init();
