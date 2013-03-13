@@ -94,30 +94,30 @@ class ModelTest < ChartedTest
     assert_equal(visitor, event.visitor)
     assert_equal('User Clicked', event.label)
 
-    conversion = visitor.start_conversion('User Purchased')
-    visitor.start_conversion('User Purchased') # no effect
-    assert_equal(1, visitor.conversions.length)
+    conversion = visitor.start_conversions('User Purchased;User Abandon').first
+    visitor.start_conversions('User Purchased') # no effect
+    assert_equal(2, visitor.conversions.length)
     assert_equal(site, conversion.site)
     assert_equal(visitor, conversion.visitor)
     assert_equal('User Purchased', conversion.label)
     refute(conversion.ended?)
-    visitor.end_conversion('User Purchased')
+    visitor.end_conversions('User Purchased')
     assert(conversion.ended?)
-    visitor.end_conversion('Nonexistant')
-    assert_equal(2, visitor.conversions.length)
+    visitor.end_conversions('Nonexistant')
+    assert_equal(3, visitor.conversions.length)
 
-    experiment = visitor.start_experiment('User Next', 'A')
-    visitor.start_experiment('User Next', 'A') # no effect
-    visitor.start_experiment('User Next', 'B') # changes bucket
+    experiment = visitor.start_experiments('User Next:A').first
+    visitor.start_experiments('User Next:A') # no effect
+    visitor.start_experiments('User Next:B') # changes bucket
     assert_equal(1, visitor.experiments.length)
     assert_equal(site, experiment.site)
     assert_equal(visitor, experiment.visitor)
     assert_equal('User Next', experiment.label)
     assert_equal('B', experiment.bucket)
     refute(experiment.ended?)
-    visitor.end_experiment('User Next')
+    visitor.end_experiments('User Next')
     assert(experiment.ended?)
-    visitor.end_experiment('Nonexistant') # no effect
+    visitor.end_experiments('Nonexistant') # no effect
     assert_equal(1, visitor.experiments.length)
   end
 
@@ -270,14 +270,11 @@ class AppTest < ChartedTest
     refute(logo.ended?)
     refute(button.ended?)
 
-    get '/charted/conversion', conversion: 'Logo Clicked'
+    get '/charted/conversions', conversions: 'Logo Clicked;Button Clicked'
     assert(last_response.ok?)
     logo.reload
-    assert(logo.ended?)
-
-    get '/charted/conversion', conversion: 'Button Clicked'
-    assert(last_response.ok?)
     button.reload
+    assert(logo.ended?)
     assert(button.ended?)
   end
 

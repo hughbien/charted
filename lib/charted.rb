@@ -138,30 +138,34 @@ module Charted
       # invalid IP address, skip setting country
     end
 
-    def start_conversion(label)
-      conversions.first(label: label) || self.conversions.create(label: label)
-    end
-
-    def end_conversion(label)
-      conv = start_conversion(label)
-      conv.end!
-      conv
-    end
-
-    def start_experiment(label, bucket)
-      exp = experiments.first(label: label)
-      if exp
-        exp.update(bucket: bucket) if exp.bucket != bucket
-        exp
-      else
-        self.experiments.create(label: label, bucket: bucket)
+    def start_conversions(labels)
+      labels.to_s.split(';').map(&:strip).map do |label|
+        conversions.first(label: label) || self.conversions.create(label: label)
       end
     end
 
-    def end_experiment(label)
-      exp = experiments.first(label: label)
-      exp.end! if exp
-      exp
+    def end_conversions(labels)
+      start_conversions(labels).each(&:end!)
+    end
+
+    def start_experiments(labels) # label:bucket;...
+      labels.to_s.split(';').map do |str|
+        label, bucket = str.split(':', 2).map(&:strip)
+        exp = experiments.first(label: label)
+        if exp
+          exp.update(bucket: bucket) if exp.bucket != bucket
+          exp
+        else
+          self.experiments.create(label: label, bucket: bucket)
+        end
+      end
+    end
+
+    def end_experiments(labels)
+      labels.to_s.split(';').map(&:strip).each do |label|
+        exp = experiments.first(label: label)
+        exp.end! if exp
+      end
     end
 
     def self.generate_secret
@@ -263,20 +267,20 @@ module Charted
         path: params[:path],
         title: params[:title],
         referrer: params[:referrer])
-      params[:conversions].to_s.split(';').map(&:strip).each do |label|
-        @visitor.start_conversion(label)
-      end if params[:conversions]
+      @visitor.start_conversions(params[:conversions])
       '/**/'
     end
 
     get '/event' do
       halt(404) if @visitor.nil?
       @visitor.events.create(label: params[:event])
+      '/**/'
     end
 
-    get '/conversion' do
+    get '/conversions' do
       halt(404) if @visitor.nil?
-      @visitor.end_conversion(params[:conversion])
+      @visitor.end_conversions(params[:conversions])
+      '/**/'
     end
 
     error do
