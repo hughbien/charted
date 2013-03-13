@@ -138,6 +138,12 @@ module Charted
       # invalid IP address, skip setting country
     end
 
+    def make_events(labels)
+      labels.to_s.split(';').map(&:strip).map do |label|
+        events.create(label: label)
+      end
+    end
+
     def start_conversions(labels)
       labels.to_s.split(';').map(&:strip).map do |label|
         conversions.first(label: label) || self.conversions.create(label: label)
@@ -268,18 +274,15 @@ module Charted
         title: params[:title],
         referrer: params[:referrer])
       @visitor.start_conversions(params[:conversions])
+      @visitor.start_experiments(params[:experiments])
       '/**/'
     end
 
-    get '/event' do
+    get '/record' do
       halt(404) if @visitor.nil?
-      @visitor.events.create(label: params[:event])
-      '/**/'
-    end
-
-    get '/conversions' do
-      halt(404) if @visitor.nil?
+      @visitor.make_events(params[:events])
       @visitor.end_conversions(params[:conversions])
+      @visitor.end_experiments(params[:experiments])
       '/**/'
     end
 

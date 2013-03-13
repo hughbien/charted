@@ -89,7 +89,7 @@ class ModelTest < ChartedTest
     assert_nil(site.visitor_with_cookie("0-zzzzz"))
     assert_nil(site.visitor_with_cookie(nil))
 
-    event = visitor.events.create(label: 'User Clicked')
+    event = visitor.make_events('User Clicked').first
     assert_equal(site, event.site)
     assert_equal(visitor, event.visitor)
     assert_equal('User Clicked', event.label)
@@ -243,19 +243,23 @@ class AppTest < ChartedTest
   end
 
   def test_events # TODO: use correct HTTP methods?
-    get '/charted/event', event: 'Event Label'
+    get '/charted/record', events: 'Event Label;Event Label 2'
     assert_equal(404, last_response.status)
 
     visitor = @site.visitors.create
     set_cookie("charted=#{visitor.cookie}")
-    get '/charted/event', event: 'Event Label'
+    get '/charted/record', events: 'Event Label;Event Label 2'
     assert(last_response.ok?)
-    assert_equal(1, Charted::Event.count)
+    assert_equal(2, Charted::Event.count)
 
-    event = Charted::Event.first
+    event = Charted::Event.first(label: 'Event Label')
     assert_equal(@site, event.site)
     assert_equal(visitor, event.visitor)
     assert_equal('Event Label', event.label)
+
+    event2 = Charted::Event.first(label: 'Event Label 2')
+    assert(event2)
+    assert_equal('Event Label 2', event2.label)
   end
 
   def test_conversions
@@ -270,7 +274,31 @@ class AppTest < ChartedTest
     refute(logo.ended?)
     refute(button.ended?)
 
-    get '/charted/conversions', conversions: 'Logo Clicked;Button Clicked'
+    get '/charted/record', conversions: 'Logo Clicked;Button Clicked'
+    assert(last_response.ok?)
+    logo.reload
+    button.reload
+    assert(logo.ended?)
+    assert(button.ended?)
+  end
+
+  def test_experiments
+    visitor = @site.visitors.create
+    set_cookie("charted=#{visitor.cookie}")
+    get '/charted', @params.merge(experiments: 'Logo:A;Button:B'), @env
+    assert(last_response.ok?)
+    assert_equal(2, Charted::Experiment.count)
+
+    logo = visitor.experiments.first(label: 'Logo')
+    button = visitor.experiments.first(label: 'Button')
+    assert_equal('Logo', logo.label)
+    assert_equal('A', logo.bucket)
+    refute(logo.ended?)
+    assert_equal('Button', button.label)
+    assert_equal('B', button.bucket)
+    refute(button.ended?)
+
+    get '/charted/record', experiments: 'Logo;Button'
     assert(last_response.ok?)
     logo.reload
     button.reload
