@@ -212,7 +212,7 @@ class AppTest < ChartedTest
     assert_equal(@site, visit.site)
     assert_equal('Prime', visit.title)
     assert_equal('/', visit.path)
-    assert_equal('localhost', visit.referrer)
+    assert_equal(nil, visit.referrer)
     assert_equal('1280x800', visitor.resolution)
     assert_equal('United States', visitor.country)
     assert_equal(visitor.cookie, rack_mock_session.cookie_jar['charted'])
