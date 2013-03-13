@@ -26,11 +26,27 @@ var Charted = {
       str.push(arguments[i]);
     }
     this.send(this.RECORD_URL, "events=" + encodeURIComponent(str.join(";")));
+  },
+  goals: function() {
+    var str = [];
+    for (var i = 0; i < arguments.length; i++) {
+      str.push(arguments[i]);
+    }
+    this.send(this.RECORD_URL, "goals=" + encodeURIComponent(str.join(";")));
+  },
+  init: function() {
+    var convQuery = "";
+    var conversions = document.body.getAttribute("data-conversions");
+    if (conversions) {
+      convQuery = "&conversions=" + encodeURIComponent(conversions);
+    }
+    Charted.send(
+      Charted.URL,
+      "path=" + encodeURIComponent(window.location.pathname) +
+      "&title=" + encodeURIComponent(document.title) +
+      "&referrer=" + encodeURIComponent(document.referrer) +
+      "&resolution=" + encodeURIComponent(screen.width+"x"+screen.height) +
+      convQuery);
   }
 };
-Charted.send(
-  Charted.URL,
-  "path=" + encodeURIComponent(window.location.pathname) +
-  "&title=" + encodeURIComponent(document.title) +
-  "&referrer=" + encodeURIComponent(document.referrer) +
-  "&resolution=" + encodeURIComponent(screen.width+"x"+screen.height));
+Charted.init();
