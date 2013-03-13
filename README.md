@@ -87,7 +87,6 @@ TODO
 ====
 
 * deploy task in Rakefile for development
-* hide empty tables
 * add date range option
 
 License

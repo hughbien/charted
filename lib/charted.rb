@@ -427,6 +427,10 @@ module Charted
       rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
       nodes << table
 
+      nodes.reject! do |node|
+        minimum = node.is_a?(Dashes::Table) ? 1 : 0
+        node.instance_variable_get(:@rows).size == minimum # TODO: hacked
+      end
       print(Dashes::Grid.new.width(`tput cols`.to_i).add(*nodes))
     end
 
