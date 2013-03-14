@@ -8,6 +8,10 @@ Installation
 
     $ gem install charted
 
+Also install the relevant database adapter, depending on which db you plan to use:
+
+    $ gem install dm-mysql-adapter
+
 Setup a `config.ru` file and run it like any other Sinatra application.
 
     require 'rubygems'
@@ -126,6 +130,14 @@ Head on over to `http://localhost:9393/charted/prime.html`.  This is where
 recordings should occur.
 
 Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
+
+TODO
+====
+
+* don't catch-all load error, makes debugging config.ru difficult
+* fix sorting
+* fix search terms
+* consider removing colored titles
 
 License
 =======
