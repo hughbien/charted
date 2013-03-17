@@ -272,7 +272,8 @@ module Charted
           expires: (Date.today + 365*2).to_time)
       end
 
-      referrer = nil if URI.parse(params[:referrer].to_s).host == @site.domain
+      referrer = params[:referrer].to_s
+      referrer = nil if URI.parse(referrer).host == @site.domain || referrer =~ /^\s*$/
       @visitor.visits.create(
         path: params[:path],
         title: params[:title],

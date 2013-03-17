@@ -138,6 +138,8 @@ TODO
 * fix sorting
 * fix search terms
 * consider removing colored titles
+* shorten lists (too many single entries) on dashboard, add --full?
+* browser version (IE6, IE7, IE8...) ?
 
 License
 =======
