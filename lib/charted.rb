@@ -20,7 +20,7 @@ DataMapper::Model.raise_on_save_failure = true
 DataMapper::Property::String.length(255)
 
 module Charted
-  VERSION = '0.0.4'
+  VERSION = '0.0.5'
   GEOIP = GeoIP.new("#{File.dirname(__FILE__)}/../geoip.dat")
   JS_FILE = "#{File.dirname(__FILE__)}/../public/charted/script.js"
 
@@ -186,9 +186,9 @@ module Charted
     include DataMapper::Resource
 
     property :id, Serial
-    property :path, String, :required => true
-    property :title, String, :required => true
-    property :referrer, String
+    property :path, String, required: true
+    property :title, String, required: true
+    property :referrer, String, length: 2048
     property :search_terms, String
     property :created_at, DateTime
 
