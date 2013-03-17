@@ -19,7 +19,7 @@ require 'dashes'
 DataMapper::Model.raise_on_save_failure = true
 
 module Charted
-  VERSION = '0.0.2'
+  VERSION = '0.0.3'
   GEOIP = GeoIP.new("#{File.dirname(__FILE__)}/../geoip.dat")
   JS_FILE = "#{File.dirname(__FILE__)}/../public/charted/script.js"
 
