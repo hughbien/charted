@@ -17,9 +17,10 @@ require 'colorize'
 require 'dashes'
 
 DataMapper::Model.raise_on_save_failure = true
+DataMapper::Property::String.length(255)
 
 module Charted
-  VERSION = '0.0.3'
+  VERSION = '0.0.4'
   GEOIP = GeoIP.new("#{File.dirname(__FILE__)}/../geoip.dat")
   JS_FILE = "#{File.dirname(__FILE__)}/../public/charted/script.js"
 
@@ -272,8 +273,12 @@ module Charted
           expires: (Date.today + 365*2).to_time)
       end
 
-      referrer = params[:referrer].to_s
-      referrer = nil if URI.parse(referrer).host == @site.domain || referrer =~ /^\s*$/
+      begin
+        referrer = params[:referrer].to_s
+        referrer = nil if URI.parse(referrer).host == @site.domain || referrer =~ /^\s*$/
+      rescue URI::InvalidURIError
+        referrer = nil
+      end
       @visitor.visits.create(
         path: params[:path],
         title: params[:title],
