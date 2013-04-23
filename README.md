@@ -38,14 +38,10 @@ Then initialize the database:
 
     $ charted --migrate
 
-The app should be mounted to `/charted` path on your domain.  Then in your app,
-include the script right before the closing `</body>` tag:
+The app should be mounted to `/charted` path on your domain
 
-    <script src="/charted/script.js" async></script>
-
-If you concatenate your JavaScript, you can generate the `script.js` file and
-add it to your project.  The downside being when you update the charted gem,
-you'll also have to remember to update the JavaScript:
+In your app, generate a `charted.js` file.  This can be safely concatenated with
+you other JavaScript assets.
 
     $ charted --js > /path/to/my/project/public/charted.js
 
@@ -54,7 +50,7 @@ Updating
 
     $ gem install charted
     
-If you concatenated the JavaScript, you may need to do it again:
+You may need to generate a `charted.js` file again:
 
     $ charted --js > /path/to/my/project/public/charted.js
 
