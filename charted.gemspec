@@ -15,7 +15,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'pony'
   s.add_dependency 'useragent'
   s.add_dependency 'search_terms'
-  s.add_dependency 'colorize'
   s.add_dependency 'dashes'
   s.add_development_dependency 'minitest'
  

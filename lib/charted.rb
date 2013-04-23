@@ -13,7 +13,6 @@ require 'geoip'
 require 'pony'
 require 'useragent'
 require 'search_terms'
-require 'colorize'
 require 'dashes'
 
 DataMapper::Model.raise_on_save_failure = true
@@ -338,17 +337,15 @@ module Charted
       max_width = [`tput cols`.to_i / 2, 60].min
       chart = Dashes::Chart.new.
         max_width(max_width).
-        title("Total Visits".colorize(:light_green))
+        title("Total Visits")
       chart2 = Dashes::Chart.new.
         max_width(max_width).
-        title("Unique Visits".colorize(:light_green))
+        title("Unique Visits")
       table = Dashes::Table.new.
         max_width(max_width).
         spacing(:min, :min, :max).
         align(:right, :right, :left).
-        row('Total'.colorize(:light_blue),
-          'Unique'.colorize(:light_blue),
-          'Visits'.colorize(:light_green)).
+        row('Total', 'Unique', 'Visits').
         separator
       (0..11).each do |delta|
         date = Charted.prev_month(Date.today, delta)
@@ -374,9 +371,7 @@ module Charted
           max_width(max_width).
           spacing(:min, :min, :max).
           align(:right, :right, :left).
-          row('Total'.colorize(:light_blue),
-            '%'.colorize(:light_blue),
-            column.colorize(:light_green)).separator
+          row('Total', '%', column).separator
         rows = []
         total = @site.send(type).count(field.not => nil)
         @site.send(type).aggregate(field, :all.count).each do |label, count|
@@ -392,9 +387,8 @@ module Charted
         max_width(max_width).
         spacing(:min, :min, :max).
         align(:right, :right, :left).
-        row('Total'.colorize(:light_blue),
-          'Unique'.colorize(:light_blue), 
-          'Events'.colorize(:light_green)).separator
+        row('Total', 'Unique', 'Events').
+        separator
       rows = []
       @site.events.aggregate(:label, :all.count).each do |label, count|
         unique = @site.visitors.count(:events => {label: label})
@@ -407,9 +401,8 @@ module Charted
         max_width(max_width).
         spacing(:min, :min, :max).
         align(:right, :right, :left).
-        row('Start'.colorize(:light_blue),
-          'End'.colorize(:light_blue), 
-          'Conversions'.colorize(:light_green)).separator
+        row('Start', 'End', 'Conversions').
+        separator
       rows = []
       @site.conversions.aggregate(:label, :all.count).each do |label, count|
         ended = @site.conversions.count(label: label, :ended_at.not => nil)
@@ -422,9 +415,8 @@ module Charted
         max_width(max_width).
         spacing(:min, :min, :max).
         align(:right, :right, :left).
-        row('Start'.colorize(:light_blue),
-          'End'.colorize(:light_blue), 
-          'Experiments'.colorize(:light_green)).separator
+        row('Start', 'End', 'Experiments').
+        separator
       rows = []
       @site.experiments.aggregate(:label, :bucket, :all.count).each do |label, bucket, count|
         ended = @site.experiments.count(label: label, bucket: bucket, :ended_at.not => nil)
