@@ -380,7 +380,7 @@ module Charted
           label = "#{label[0..37]}..." if label.length > 40
           rows << [format(count), "#{((count / total.to_f) * 100).round}%", label]
         end
-        rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+        rows.sort_by { |r| r[1].to_i }.reverse.each { |row| table.row(*row) }
         nodes << table
       end
       table = Dashes::Table.new.
@@ -394,7 +394,7 @@ module Charted
         unique = @site.visitors.count(:events => {label: label})
         rows << [format(count), format(unique), label]
       end
-      rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+      rows.sort_by { |r| r[1].to_i }.reverse.each { |row| table.row(*row) }
       nodes << table
 
       table = Dashes::Table.new.
@@ -408,7 +408,7 @@ module Charted
         ended = @site.conversions.count(label: label, :ended_at.not => nil)
         rows << [format(count), format(ended), label]
       end
-      rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+      rows.sort_by { |r| r[1].to_i }.reverse.each { |row| table.row(*row) }
       nodes << table
 
       table = Dashes::Table.new.
@@ -422,7 +422,7 @@ module Charted
         ended = @site.experiments.count(label: label, bucket: bucket, :ended_at.not => nil)
         rows << [format(count), format(ended), "#{label}: #{bucket}"]
       end
-      rows.sort_by { |r| r[1] }.reverse.each { |row| table.row(*row) }
+      rows.sort_by { |r| r[1].to_i }.reverse.each { |row| table.row(*row) }
       nodes << table
 
       nodes.reject! do |node|

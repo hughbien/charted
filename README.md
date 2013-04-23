@@ -135,7 +135,6 @@ TODO
 ====
 
 * don't catch-all load error, makes debugging config.ru difficult
-* fix sorting
 * shorten lists (too many single entries) on dashboard, add --full or --single?
 * browser version (IE6, IE7, IE8...) ?
 * handle 255 string length limit
