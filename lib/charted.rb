@@ -492,7 +492,7 @@ module Charted
     end
 
     def add_truncated(table, rows)
-      rows = rows.sort_by { |r| r[0].to_i }.reverse
+      rows = rows.sort_by { |r| r[0].gsub(/[^\d]/, '').to_i }.reverse
       if rows.length > 12 
         rows = rows[0..11]
         rows << ['...', '...', '...']
