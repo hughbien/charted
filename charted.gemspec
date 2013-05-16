@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'minitest'
  
   s.files         = Dir.glob('*.{md,rb,ru,dat}') +
-                    %w(charted) +
+                    %w(charted public/charted/script.js) +
                     Dir.glob('{lib,test}/*.rb')
   s.require_paths = ['lib']
   s.bindir        = '.'
