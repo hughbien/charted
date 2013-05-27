@@ -335,12 +335,6 @@ module Charted
       site_required
       nodes = []
       max_width = [`tput cols`.to_i / 2, 60].min
-      chart = Dashes::Chart.new.
-        max_width(max_width).
-        title("Total Visits")
-      chart2 = Dashes::Chart.new.
-        max_width(max_width).
-        title("Unique Visits")
       table = Dashes::Table.new.
         max_width(max_width).
         spacing(:min, :min, :max).
@@ -356,10 +350,8 @@ module Charted
           :created_at.gte => date,
           :created_at.lt => Charted.next_month(date)})
         table.row(format(visits), format(unique), date.strftime('%B %Y'))
-        chart.row(date.strftime('%b %Y'), visits)
-        chart2.row(date.strftime('%b %Y'), unique)
       end
-      nodes += [table, chart, chart2]
+      nodes += [table]
       [[:browser, 'Browsers', :visitors],
        [:resolution, 'Resolutions', :visitors],
        [:platform, 'Platforms', :visitors],
