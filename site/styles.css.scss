@@ -15,7 +15,7 @@
 body { background: #131313 url(/bg.png); font-size: 15px; margin: 0 0 4em;
   font-family: charted, "trebuchet ms", sans-serif; color: #fff; }
 a { color: #d07f01; }
-a:hover { color: #300;
+a:hover { color: #fff;
   -moz-transition: color 200ms linear; 
   -ms-transition: color 200ms linear; 
   -o-transition: color 200ms linear; 
@@ -37,7 +37,7 @@ pre { background: #000; color: #fff; padding: 15px 20px; line-height: 1.2em; ove
 pre .prompt { color: #090; }
 pre .comment { color: #888; }
 
-#console { margin: 12px 0 80px; position: relative; top: 2em; 
+#console { margin: 12px 0 95px; position: relative; top: 2em; 
   box-shadow: #0e0e0e 3px 3px 3px; font-size: 0.9em; }
 #console h3 { border-top-left-radius: 6px; border-top-right-radius: 6px;
   border: 1px solid #999; padding: 6px 0; color: #111; text-align: center;
