@@ -336,8 +336,6 @@ module Charted
       nodes = []
       max_width = [`tput cols`.to_i / 2, 60].min
       table = Dashes::Table.new.
-        max_width(max_width).
-        spacing(:min, :min, :max).
         align(:right, :right, :left).
         row('Total', 'Unique', 'Visits').
         separator

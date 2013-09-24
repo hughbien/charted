@@ -1,0 +1,172 @@
+!!! 5
+%html
+  %head
+    %title Charted &mdash; web traffic analytics
+    %link(rel='stylesheet' href='/all.css' media='all')
+    %link(rel='shortcut icon' href='/favicon.ico' type='image/vnd.microsoft.icon')
+    %meta(charset='utf-8')
+    %meta(name='viewport' content='initial-scale=1.0,width=device-width')
+    %meta(name='description' content='Charted is a Sinatra backend for recording web traffic and A/B testing.')
+  %body
+    .frame
+      %h1
+        Charted keeps track of
+        %br.narrow-only
+        %strong _
+
+      #console
+        %h3 &nbsp;
+        %pre
+          %code
+            = preserve do
+              :plain
+                <strong class="prompt">$</strong> charted -s chartedrb.com
+                +-------+--------+------------------------------------+<span class="desktop-only"> +-----------------------------------------------------+</span>
+                | Total | Unique | Visits                             |<span class="desktop-only"> | Total Visits                                        |</span>
+                +-------+--------+------------------------------------+<span class="desktop-only"> +-----------------------------------------------------+</span>
+                | 1,319 |    948 | September 2013                     |<span class="desktop-only"> | Sep 2013 ========================================== |</span>
+                | 1,173 |    950 | August 2013                        |<span class="desktop-only"> | Aug 2013 ========================================   |</span>
+                |   906 |    745 | July 2013                          |<span class="desktop-only"> | Jul 2013 ====================================       |</span>
+                |   866 |    656 | June 2013                          |<span class="desktop-only"> | Jun 2013 ================================           |</span>
+                |   789 |    539 | May 2013                           |<span class="desktop-only"> | May 2013 ==========================                 |</span>
+                |   649 |    436 | April 2013                         |<span class="desktop-only"> | Apr 2013 =====================                      |</span>
+                |   588 |    322 | March 2013                         |<span class="desktop-only"> | Mar 2013 =================                          |</span>
+                +-------+--------+------------------------------------+<span class="desktop-only"> +-----------------------------------------------------+</span>
+                +-----------------------------------------------------+<span class="desktop-only"> +-------+-----+---------------------------------------+</span>
+                | Total | Unique | Events                             |<span class="desktop-only"> | Total |   % | Browsers                              |</span>
+                +-----------------------------------------------------+<span class="desktop-only"> +-------+-----+---------------------------------------+</span>
+                |   218 |    110 | Logo Clicked                       |<span class="desktop-only"> | 2,661 | 46% | Chrome                                |</span>
+                |   127 |    105 | Nav Clicked                        |<span class="desktop-only"> |   901 | 16% | Firefox                               |</span>
+                |    94 |     76 | Modal Opened                       |<span class="desktop-only"> |   802 | 14% | Safari                                |</span>
+                |    89 |     52 | Modal Closed                       |<span class="desktop-only"> |   716 | 13% | Mozilla                               |</span>
+                |    70 |     47 | Buy Button Clicked                 |<span class="desktop-only"> |   480 |  8% | Internet Explorer                     |</span>
+                |    45 |      9 | Picture Hovered                    |<span class="desktop-only"> |   120 |  2% | Android                               |</span>
+                |    10 |      8 | Purchased                          |<span class="desktop-only"> |    12 |  0% | Opera                                 |</span>
+                ...
+
+      .about
+        %p
+          <a href="https://github.com/hughbien/charted">Charted</a> is a web traffic
+          analytics tool.  It's built on a <a href="http://sinatrarb.com">Sinatra</a>
+          backend with reports delivered via console.
+
+      .feature
+        %h3 Installing Charted
+
+        %pre
+          %code
+            = preserve do
+              :plain
+                <span class="comment"># config.ru</span>
+                require 'rubygems'
+                require 'charted'
+
+                Charted.configure do |c|
+                  c.email        'dev@example.com'  <span class="comment"># exceptions sent here</span>
+                  c.delete_after 365                <span class="comment"># delete data after 1 year</span>
+                  c.db_adapter   'mysql'
+                  c.db_host      'localhost'
+                  c.db_username  'root'
+                  c.db_password  'secret'
+                  c.db_database  'charted'
+                  c.sites        ['chartedrb.com', 'example.com']
+                end
+
+                run Charted::App if !ENV['CHARTED_CMD']
+                
+                <span class="comment"># ~/.bashrc or ~/.zshrc</span>
+                export CHARTED_CONFIG='/path/to/config.ru'
+
+                <span class="comment"># on the terminal</span>
+                <strong class="prompt">$</strong> charted --migrate
+
+        %p
+          Install with <code>gem install charted</code> and setup
+          a <code>config.ru</code> file like any other Sinatra application.
+
+        %p
+          You'll also need to 
+          <code>export CHARTED_CONFIG='/path/to/config.ru'</code> in your
+          <code>~/.bashrc</code> or <code>~/.zshrc</code>.
+
+        %p
+          When you're finished, run <code>charted --migrate</code>.
+
+      .feature
+        %h3 Website Preparation
+
+        %pre
+          %code
+            = preserve do
+              :plain
+                <strong class="prompt">$</strong> charted --js > /path/to/project/charted.js
+
+        %p
+          Include the <code>charted.js</code> file in your website.  This file can
+          be generated using the charted binary.  The JavaScript file can be concatenated
+          using your project's asset pipeline.
+
+      .feature
+        %h3 Reporting
+
+        %pre
+          %code
+            = preserve do
+              :plain
+                <strong class="prompt">$</strong> charted --site example.com
+                +-------+--------+--------------------------------------+
+                | Total | Unique | Visits                               |
+                +-------+--------+--------------------------------------+
+                | 7,012 |  5,919 | February 2013                        |
+                | 6,505 |  4,722 | January 2013                         |
+                | 5,342 |  3,988 | December 2012                        |
+                ...
+
+        %p
+          Traffic reports are delivered via the console.  Just provide the
+          <code>--site</code> switch with a few letters of the domain you want
+          to know about.
+
+      .feature
+        %h3 Client-side Recording
+
+        %pre
+          %code
+            = preserve do
+              :plain
+                <span class="comment">// tracking events</span>
+                Charted.events("1st Button Clicked");
+                Charted.events("1st Button Clicked", "2nd Button Clicked");
+
+                <span class="comment">// tracking conversions</span>
+                &lt;body data-conversions="RSS Subscribed; Item Purchased"&gt;
+                Charted.goals("RSS Subscribed");
+                Charted.goals("RSS Subscribed", "Item Purchased"); // batched
+
+                <span class="comment">// tracking experiments</span>
+                &lt;body data-experiments="Buy Button: Blue, Green, Red"&gt;
+                Charted.goals("Buy Button");
+
+        %p
+          Any events can be recorded with JavaScript using <code>Charted.events()</code>.
+
+        %p
+          To start tracking conversions, add the <code>data-conversions</code> attribute
+          to the <code>&lt;body&gt;</code> tag on your page.  Multiple goals can be
+          separated with a semi-colon.  Then use the <code>Charted.goals()</code> function
+          to record when a user accomplishes the goal.
+
+        %p
+          A/B testing is similar, except you use the <code>data-experiments</code>
+          attribute with the format: <code>data-experiments="LABEL: BUCKET1, BUCKET2, BUCKET3"</code>.
+          Charted will randomly select a bucket for each visitor and add a
+          unique class name to the body tag.
+
+      .about
+        %p
+          Charted is released under the
+          <a href="https://github.com/hughbien/thyme/blob/master/LICENSE.md">BSD License</a>
+          and developed by
+          <a href="http://hughbien.com">Hugh Bien</a>.
+
+    %script{:src => '/all.js'}

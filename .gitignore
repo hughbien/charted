@@ -2,3 +2,5 @@
 *.gem
 Gemfile.lock
 *.sqlite3
+site/.sass-cache
+site/public

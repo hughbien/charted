@@ -25,3 +25,22 @@ task :geoip do
   `curl "http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz" > geoip.dat.gz`
   `gunzip geoip.dat.gz`
 end
+
+namespace :site do
+  task :default => :build
+
+  desc 'Build site'
+  task :build do
+    `cd site && stasis`
+  end
+
+  desc 'Push site to chartedrb.com'
+  task :push => [:clean, :build] do
+    `rsync -avz --delete site/public/ chartedrb.com:webapps/chartedrb`
+  end
+
+  desc 'Remove built site artifacts'
+  task :clean do
+    rm_r 'site/public'
+  end
+end
