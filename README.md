@@ -130,6 +130,7 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
+* record/display uniques for pages, etc...
 * don't catch-all load error, makes debugging config.ru difficult
 * add --full or --single
 * browser version (IE6, IE7, IE8...) ?
