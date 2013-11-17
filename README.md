@@ -130,11 +130,15 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
+* add ability to toggle bucket for local dev
+* record cookie on client-side to handle charted server outage
 * record/display uniques for pages, etc...
 * don't catch-all load error, makes debugging config.ru difficult
 * add --full or --single
 * browser version (IE6, IE7, IE8...) ?
 * handle 255 string length limit
+* plugin system
+* turn on/off plugin per site
 
 License
 =======

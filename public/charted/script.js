@@ -62,7 +62,7 @@ var Charted = {
     if (experiments) {
       expQuery = "&experiments="
       experiments = experiments.split(";");
-      for (var i = 0; i < experiments.length; experiments++) {
+      for (var i = 0; i < experiments.length; i++) {
         var experiment = experiments[i].split(":");
         var label = this.strip(experiment[0]);
         var buckets = experiment[1].split(",");
@@ -70,7 +70,7 @@ var Charted = {
         bucket = this.strip(bucket);
 
         document.body.className +=
-          (this.normalize(label) + "-" + this.normalize(bucket));
+          (this.normalize(label) + "-" + this.normalize(bucket) + " ");
         expQuery += encodeURIComponent(label + ":" + bucket + ";");
       }
     }
