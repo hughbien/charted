@@ -130,8 +130,10 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
+* handle case where visitor visits "/charted" or any other route directly (bad input)
 * add ability to toggle bucket for local dev
-* record cookie on client-side to handle charted server outage
+* add local dev fixtures
+* fix cookie set path to work with different rack mounts (ie /app/charted/)
 * record/display uniques for pages, etc...
 * don't catch-all load error, makes debugging config.ru difficult
 * add --full or --single
@@ -139,6 +141,7 @@ TODO
 * handle 255 string length limit
 * plugin system
 * turn on/off plugin per site
+* --sync system to download data locally
 
 License
 =======

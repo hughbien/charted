@@ -19,7 +19,7 @@ DataMapper::Model.raise_on_save_failure = true
 DataMapper::Property::String.length(255)
 
 module Charted
-  VERSION = '0.0.8'
+  VERSION = '0.0.9'
   GEOIP = GeoIP.new("#{File.dirname(__FILE__)}/../geoip.dat")
   JS_FILE = "#{File.dirname(__FILE__)}/../public/charted/script.js"
 
@@ -122,6 +122,7 @@ module Charted
     end
 
     def cookie
+      # TODO: raise if nil id, bucket, or secret
       "#{self.id}-#{self.bucket}-#{self.secret}"
     end
 
@@ -269,6 +270,7 @@ module Charted
         response.set_cookie(
           'charted',
           value: @visitor.cookie,
+          path: '/',
           expires: (Date.today + 365*2).to_time)
       end
 

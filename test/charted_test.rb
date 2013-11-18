@@ -2,6 +2,7 @@ ENV['RACK_ENV'] = 'test'
 
 require File.expand_path('../lib/charted', File.dirname(__FILE__))
 require 'dm-migrations'
+gem 'minitest'
 require 'minitest/autorun'
 require 'rack'
 require 'rack/test'
@@ -21,7 +22,7 @@ module Pony
   end
 end
 
-class ChartedTest < MiniTest::Unit::TestCase
+class ChartedTest < Minitest::Test
   def setup
     Charted.configure(false) do |c|
       c.email       'dev@localhost'
