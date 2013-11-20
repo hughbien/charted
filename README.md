@@ -133,7 +133,6 @@ TODO
 * handle case where visitor visits "/charted" or any other route directly (bad input)
 * add ability to toggle bucket for local dev
 * add local dev fixtures
-* fix cookie set path to work with different rack mounts (ie /app/charted/)
 * record/display uniques for pages, etc...
 * don't catch-all load error, makes debugging config.ru difficult
 * add --full or --single
