@@ -24,6 +24,9 @@ var Charted = {
     var expires = "; expires="+date.toGMTString();
     document.cookie = "chartedignore=1"+expires+"; path=/";
   },
+  clear: function() {
+    document.cookie = 'charted=; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+  },
   strip: function(str) {
     return String(str).replace(/^\s+|\s+$/g, '');
   },
