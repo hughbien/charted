@@ -148,15 +148,14 @@ module Charted
     def load_config
       return if @config_loaded
       file = ENV['CHARTED_CONFIG']
+      sys_exit("Please set CHARTED_CONFIG to `config.ru` file.") if !File.exist?(file.to_s)
       load(file)
       @config_loaded = true
-    rescue LoadError
-      sys_exit("CHARTED_CONFIG not set, please set to `config.ru` file.")
     end
 
     def sys_exit(reason)
       print(reason)
-      ENV['RACK_ENV'] == 'test' ? raise(ExitError.new) : exit
+      ENV['RACK_ENV'] == 'test' ? raise(ExitError.new(reason)) : exit
     end
 
     def print(string)

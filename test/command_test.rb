@@ -2,6 +2,7 @@ require_relative 'helper'
 
 class CommandTest < ChartedTest
   def setup
+    super
     @cmd = Charted::Command.new
     @cmd.config_loaded = true
     Charted::Site.destroy

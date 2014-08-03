@@ -131,7 +131,6 @@ TODO
 ====
 
 * switch to Sequel and add /migrate directory
-* don't catch-all load error, makes debugging config.ru difficult
 * handle 255 string length limit
 * make it CSRF-able w/ custom URL (inject <script> instead of AJAX GET/POST)
 * add docs for using rack-timeout and rack-throttle
