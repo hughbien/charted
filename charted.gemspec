@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
  
   s.required_rubygems_version = '>= 1.3.6'
   s.add_dependency 'sinatra'
-  s.add_dependency 'data_mapper'
+  s.add_dependency 'sequel'
   s.add_dependency 'geoip'
   s.add_dependency 'pony'
   s.add_dependency 'useragent'
@@ -20,11 +20,11 @@ Gem::Specification.new do |s|
   s.add_dependency 'dashes'
   s.add_development_dependency 'minitest'
   s.add_development_dependency 'rack-test'
-  s.add_development_dependency 'dm-sqlite-adapter'
+  s.add_development_dependency 'sqlite3'
  
   s.files         = Dir.glob('*.{md,rb,ru,dat}') +
                     %w(public/charted/script.js) +
-                    Dir.glob('{bin,lib,test}/**/*.rb')
+                    Dir.glob('{bin,lib,migrate,test}/**/*.rb')
   s.require_paths = ['lib']
   s.bindir        = 'bin'
   s.executables   = ['charted']

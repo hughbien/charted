@@ -8,21 +8,21 @@ module Charted
       sys_exit("Please set 'delete_after' config.") if Charted.config.delete_after.nil?
 
       threshold = Date.today - Charted.config.delete_after
-      Visit.all(:created_at.lt => threshold).destroy
-      Event.all(:created_at.lt => threshold).destroy
-      Conversion.all(:created_at.lt => threshold).destroy
-      Experiment.all(:created_at.lt => threshold).destroy
-      Visitor.all(:created_at.lt => threshold).each do |visitor|
-        visitor.destroy if visitor.visits.count == 0 &&
+      Visit.where { created_at < threshold }.delete
+      Event.where { created_at < threshold }.delete
+      Conversion.where { created_at < threshold }.delete
+      Experiment.where { created_at < threshold }.delete
+      Visitor.where { created_at < threshold }.each do |visitor|
+        visitor.delete if visitor.visits.count == 0 &&
           visitor.events.count == 0 &&
           visitor.conversions.count == 0 &&
           visitor.experiments.count == 0
       end
 
       if label
-        Event.all(label: label).destroy
-        Conversion.all(label: label).destroy
-        Experiment.all(label: label).destroy
+        Event.where(label: label).delete
+        Conversion.where(label: label).delete
+        Experiment.where(label: label).delete
       end
     end
 
@@ -36,31 +36,35 @@ module Charted
         separator
       (0..11).each do |delta|
         date = Charted.prev_month(Date.today, delta)
-        visits = @site.visits.count(
-          :created_at.gte => date,
-          :created_at.lt => Charted.next_month(date))
-        unique = @site.visitors.count(:visits => {
-          :created_at.gte => date,
-          :created_at.lt => Charted.next_month(date)})
+        query = Charted::Visit.
+          join(:visitors, id: :visitor_id).
+          where(visitors__site_id: @site.id).
+          where('visits.created_at >= ? AND visits.created_at < ?', date, Charted.next_month(date))
+        visits = query.count
+        unique = query.select(:visitor_id).distinct.count
         table.row(format(visits), format(unique), date.strftime('%B %Y'))
       end
       nodes += [table]
-      [[:browser, 'Browsers', :visitors],
-       [:resolution, 'Resolutions', :visitors],
-       [:platform, 'Platforms', :visitors],
-       [:country, 'Countries', :visitors],
-       [:title, 'Pages', :visits],
-       [:referrer, 'Referrers', :visits],
-       [:search_terms, 'Searches', :visits]].each do |field, column, type|
+      [[:browser, 'Browsers', Charted::Visitor],
+       [:resolution, 'Resolutions', Charted::Visitor],
+       [:platform, 'Platforms', Charted::Visitor],
+       [:country, 'Countries', Charted::Visitor],
+       [:title, 'Pages', Charted::Visit],
+       [:referrer, 'Referrers', Charted::Visit],
+       [:search_terms, 'Searches', Charted::Visit]].each do |field, column, type|
         table = Dashes::Table.new.
           max_width(max_width).
           spacing(:min, :min, :max).
           align(:right, :right, :left).
           row('Total', '%', column).separator
         rows = []
-        total = @site.send(type).count(field.not => nil)
-        @site.send(type).aggregate(field, :all.count).each do |label, count|
-          label = label.to_s.strip
+        query = type.exclude(field => nil)
+        query = query.join(:visitors, id: :visitor_id) if type == Charted::Visit
+        query = query.where(visitors__site_id: @site.id)
+        total = query.count
+        query.group_and_count(field).each do |row|
+          count = row[:count]
+          label = row[:label].to_s.strip
           next if label == ""
           label = "#{label[0..37]}..." if label.length > 40
           rows << [format(count), "#{((count / total.to_f) * 100).round}%", label]
@@ -75,8 +79,13 @@ module Charted
         row('Total', 'Unique', 'Events').
         separator
       rows = []
-      @site.events.aggregate(:label, :all.count).each do |label, count|
-        unique = @site.visitors.count(:events => {label: label})
+      events = Charted::Event.join(:visitors, id: :visitor_id).where(visitors__site_id: @site.id)
+      events.group_and_count(:label).all.each do |row|
+        label, count = row[:label], row[:count]
+        unique = Charted::Visitor.
+          join(:events, visitor_id: :id).
+          where(site_id: @site.id, events__label: label).
+          select(:visitors__id).distinct.count
         rows << [format(count), format(unique), label]
       end
       add_truncated(table, rows)
@@ -89,8 +98,14 @@ module Charted
         row('Start', 'End', 'Conversions').
         separator
       rows = []
-      @site.conversions.aggregate(:label, :all.count).each do |label, count|
-        ended = @site.conversions.count(label: label, :ended_at.not => nil)
+      conversions = Charted::Conversion.join(:visitors, id: :visitor_id).where(visitors__site_id: @site.id)
+      conversions.group_and_count(:label).all.each do |row|
+        label, count = row[:label], row[:count]
+        ended = Charted::Visitor.
+          join(:conversions, visitor_id: :id).
+          where(site_id: @site.id, conversions__label: label).
+          exclude(conversions__ended_at: nil).
+          select(:visitors__id).distinct.count
         rows << [format(count), format(ended), label]
       end
       add_truncated(table, rows)
@@ -103,8 +118,14 @@ module Charted
         row('Start', 'End', 'Experiments').
         separator
       rows = []
-      @site.experiments.aggregate(:label, :bucket, :all.count).each do |label, bucket, count|
-        ended = @site.experiments.count(label: label, bucket: bucket, :ended_at.not => nil)
+      experiments = Charted::Experiment.join(:visitors, id: :visitor_id).where(visitors__site_id: @site.id)
+      experiments.group_and_count(:label, :experiments__bucket).all.each do |row|
+        label, bucket, count = row[:label], row[:bucket], row[:count]
+        ended = Charted::Visitor.
+          join(:experiments, visitor_id: :id).
+          where(site_id: @site.id, experiments__label: label, experiments__bucket: bucket).
+          exclude(experiments__ended_at: nil).
+          select(:visitors__id).distinct.count
         rows << [format(count), format(ended), "#{label}: #{bucket}"]
       end
       add_truncated(table, rows)
@@ -123,17 +144,17 @@ module Charted
 
     def migrate
       load_config
-      DataMapper.auto_upgrade!
+      Charted::Migrate.run
       Charted.config.sites.each do |domain|
-        if Site.first(:domain => domain).nil?
-          Site.create(:domain => domain)
+        if Site.first(domain: domain).nil?
+          Site.create(domain: domain)
         end
       end
     end
 
     def site=(domain)
       load_config
-      sites = Site.all(:domain.like => "%#{domain}%")
+      sites = Site.where(Sequel.like(:domain, "%#{domain}%")).all
 
       if sites.length > 1
         sys_exit("\"#{domain}\" ambiguous: #{sites.map(&:domain).join(', ')}")

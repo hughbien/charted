@@ -1,18 +1,28 @@
 ENV['RACK_ENV'] = 'test'
 
 require_relative '../lib/charted'
-require 'dm-migrations'
 require 'minitest/autorun'
 require 'rack'
 require 'rack/test'
 require 'rack/server'
 require 'fileutils'
 
-DataMapper.setup(:default, 'sqlite::memory:')
-DataMapper.auto_migrate!
+Charted.configure do |c|
+  c.delete_after 365
+  c.email        'dev@localhost'
+  c.sites        ['localhost']
+  c.db_options   'sqlite::memory'
+end
+Charted::Migrate.run
 
 module Pony
   def self.mail(fields)
+    Charted::Visit.select_all.delete
+    Charted::Event.select_all.delete
+    Charted::Conversion.select_all.delete
+    Charted::Experiment.select_all.delete
+    Charted::Visitor.select_all.delete
+    Charted::Site.select_all.delete
     @last_mail = fields
   end
 
@@ -23,16 +33,6 @@ end
 
 class ChartedTest < Minitest::Test
   def setup
-    Charted.configure(false) do |c|
-      c.delete_after 365
-      c.email        'dev@localhost'
-      c.db_adapter   'sqlite3'
-      c.db_host      'localhost'
-      c.db_username  'root'
-      c.db_password  'secret'
-      c.db_database  'test.sqlite3'
-      c.sites        ['localhost']
-    end
     Pony.mail(nil)
   end
 

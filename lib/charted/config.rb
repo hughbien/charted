@@ -1,17 +1,16 @@
 module Charted
-  def self.configure(setup_db=true)
-    yield self.config
-    DataMapper.setup(:default,
-      :adapter  => config.db_adapter,
-      :host     => config.db_host,
-      :username => config.db_username,
-      :password => config.db_password,
-      :database => config.db_database
-    ) if setup_db
-  end
+  class << self
+    attr_accessor :database
 
-  def self.config
-    @config ||= Config.new
+    def configure
+      yield self.config
+      Charted.database = Sequel.connect(config.db_options)
+      require_relative 'model'
+    end
+
+    def config
+      @config ||= Config.new
+    end
   end
 
   class Config
@@ -25,7 +24,6 @@ module Charted
       end
     end
 
-    attr_option :email, :delete_after, :sites,
-                :db_adapter, :db_host, :db_username, :db_password, :db_database
+    attr_option :email, :db_options, :delete_after, :sites
   end
 end

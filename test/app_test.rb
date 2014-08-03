@@ -4,14 +4,8 @@ class AppTest < ChartedTest
   include Rack::Test::Methods
 
   def setup
-    Charted::Site.destroy
-    Charted::Visitor.destroy
-    Charted::Visit.destroy
-    Charted::Event.destroy
-    Charted::Conversion.destroy
-    Charted::Experiment.destroy
+    super
     clear_cookies
-
     @site = Charted::Site.create(:domain => 'example.org')
     @params = {
       :bucket => 1,
@@ -99,7 +93,7 @@ class AppTest < ChartedTest
     get '/charted/record', events: 'Event Label;Event Label 2'
     assert_equal(404, last_response.status)
 
-    visitor = @site.visitors.create
+    visitor = @site.add_visitor({})
     set_cookie("charted=#{visitor.cookie}")
     get '/charted/record', events: 'Event Label;Event Label 2'
     assert(last_response.ok?)
@@ -116,14 +110,14 @@ class AppTest < ChartedTest
   end
 
   def test_conversions
-    visitor = @site.visitors.create
+    visitor = @site.add_visitor({})
     set_cookie("charted=#{visitor.cookie}")
     get '/charted', @params.merge(conversions: 'Logo Clicked;Button Clicked'), @env
     assert(last_response.ok?)
     assert_equal(2, Charted::Conversion.count)
 
-    logo = visitor.conversions.first(label: 'Logo Clicked')
-    button = visitor.conversions.first(label: 'Button Clicked')
+    logo = visitor.conversions_dataset.first(label: 'Logo Clicked')
+    button = visitor.conversions_dataset.first(label: 'Button Clicked')
     refute(logo.ended?)
     refute(button.ended?)
 
@@ -136,14 +130,14 @@ class AppTest < ChartedTest
   end
 
   def test_experiments
-    visitor = @site.visitors.create
+    visitor = @site.add_visitor({})
     set_cookie("charted=#{visitor.cookie}")
     get '/charted', @params.merge(experiments: 'Logo:A;Button:B'), @env
     assert(last_response.ok?)
     assert_equal(2, Charted::Experiment.count)
 
-    logo = visitor.experiments.first(label: 'Logo')
-    button = visitor.experiments.first(label: 'Button')
+    logo = visitor.experiments_dataset.first(label: 'Logo')
+    button = visitor.experiments_dataset.first(label: 'Button')
     assert_equal('Logo', logo.label)
     assert_equal('A', logo.bucket)
     refute(logo.ended?)

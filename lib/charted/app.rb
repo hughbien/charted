@@ -12,7 +12,7 @@ module Charted
 
     get '/' do
       if @visitor.nil?
-        @visitor = @site.visitors.create(
+        @visitor = @site.add_visitor(
           resolution: params[:resolution],
           user_agent: request.user_agent,
           ip_address: request.ip,
@@ -30,7 +30,7 @@ module Charted
       rescue URI::InvalidURIError
         referrer = nil
       end
-      @visitor.visits.create(
+      @visitor.add_visit(
         path: params[:path],
         title: params[:title],
         referrer: referrer)

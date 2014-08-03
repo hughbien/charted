@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 require 'optparse'
-require 'dm-migrations'
 require 'date'
 require 'fileutils'
 require_relative '../lib/charted'

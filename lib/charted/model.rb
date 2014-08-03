@@ -1,7 +1,21 @@
-DataMapper::Model.raise_on_save_failure = true
-DataMapper::Property::String.length(255)
-
 module Charted
+  class Migrate
+    def self.run
+      Sequel.extension :migration
+      Sequel::Migrator.run(Charted.database, File.join(File.dirname(__FILE__), '..', '..', 'migrate'))
+      # re-parse the schema after table changes
+      [Site, Visitor, Visit, Event, Conversion, Experiment].each do |table|
+        table.dataset = table.dataset
+      end
+    end
+  end
+
+  module HasVisitor
+    def site
+      self.visitor.site
+    end
+  end
+
   module Endable
     def ended?
       !!ended_at
@@ -13,48 +27,31 @@ module Charted
     end
   end
 
-  class Site
-    include DataMapper::Resource
+  class Site < Sequel::Model
+    one_to_many :visitors
 
-    property :id, Serial
-    property :domain, String, :required => true, :unique => true
-    property :created_at, DateTime
-
-    has n, :visitors
-    has n, :visits, :through => :visitors
-    has n, :events, :through => :visitors
-    has n, :conversions, :through => :visitors
-    has n, :experiments, :through => :visitors
+    def initialize(*args)
+      super
+      self.created_at ||= DateTime.now
+    end
 
     def visitor_with_cookie(cookie)
-      visitor = self.visitors.get(cookie.to_s.split('-').first)
+      visitor = self.visitors_dataset[cookie.to_s.split('-').first.to_i]
       visitor && visitor.cookie == cookie ? visitor : nil
     end
   end
 
-  class Visitor
-    include DataMapper::Resource
-
-    property :id, Serial
-    property :secret, String, :required => true
-    property :resolution, String
-    property :created_at, DateTime
-    property :platform, String
-    property :browser, String
-    property :browser_version, String
-    property :country, String
-    property :bucket, Integer
-
-    belongs_to :site
-    has n, :visits
-    has n, :events
-    has n, :conversions
-    has n, :experiments
-
-    validates_presence_of :site
+  class Visitor < Sequel::Model
+    many_to_one :site
+    one_to_many :visits
+    one_to_many :events
+    one_to_many :conversions
+    one_to_many :experiments
 
     def initialize(*args)
       super
+      self.created_at ||= DateTime.now
+      self.bucket ||= rand(10)
       self.secret = self.class.generate_secret
     end
 
@@ -82,34 +79,34 @@ module Charted
 
     def make_events(labels)
       labels.to_s.split(';').map(&:strip).map do |label|
-        events.create(label: label)
+        add_event(label: label)
       end
     end
 
     def start_conversions(labels)
       labels.to_s.split(';').map(&:strip).map do |label|
-        conversions.first(label: label) || self.conversions.create(label: label)
+        conversions_dataset.first(label: label) || self.add_conversion(label: label)
       end
     end
 
     def start_experiments(labels) # label:bucket;...
       labels.to_s.split(';').map do |str|
         label, bucket = str.split(':', 2).map(&:strip)
-        exp = experiments.first(label: label)
+        exp = experiments_dataset.first(label: label)
         if exp
           exp.update(bucket: bucket) if exp.bucket != bucket
           exp
         else
-          self.experiments.create(label: label, bucket: bucket)
+          self.add_experiment(label: label, bucket: bucket)
         end
       end
     end
 
     def end_goals(labels)
       labels.to_s.split(';').map(&:strip).each do |label|
-        exp = experiments.first(label: label)
+        exp = experiments_dataset.first(label: label)
         exp.end! if exp
-        conv = conversions.first(label: label)
+        conv = conversions_dataset.first(label: label)
         conv.end! if conv
       end
     end
@@ -119,72 +116,50 @@ module Charted
     end
   end
 
-  class Visit
-    include DataMapper::Resource
+  class Visit < Sequel::Model
+    include HasVisitor
+    many_to_one :visitor
 
-    property :id, Serial
-    property :path, String, required: true
-    property :title, String, required: true
-    property :referrer, String, length: 2048
-    property :search_terms, String
-    property :created_at, DateTime
+    def initialize(*args)
+      super
+      self.created_at ||= DateTime.now
+    end
 
-    belongs_to :visitor
-    has 1, :site, :through => :visitor
-
-    validates_presence_of :visitor
-
-    before :save, :set_search_terms
-
-    def set_search_terms
-      return if self.referrer.to_s =~ /^\s*$/
-      self.search_terms = URI.parse(self.referrer).search_string
+    def before_save
+      self.search_terms = URI.parse(self.referrer).search_string if self.referrer.to_s !~ /^\s*$/
+      super
     end
   end
 
-  class Event
-    include DataMapper::Resource
+  class Event < Sequel::Model
+    include HasVisitor
+    many_to_one :visitor
 
-    property :id, Serial
-    property :label, String, :required => true
-    property :created_at, DateTime
-
-    belongs_to :visitor
-    has 1, :site, :through => :visitor
-
-    validates_presence_of :visitor
+    def initialize(*args)
+      super
+      self.created_at ||= DateTime.now
+    end
   end
 
-  class Conversion
-    include DataMapper::Resource
+  class Conversion < Sequel::Model
+    include HasVisitor
     include Endable
+    many_to_one :visitor
 
-    property :id, Serial
-    property :label, String, :required => true
-    property :created_at, DateTime
-    property :ended_at, DateTime
-
-    belongs_to :visitor
-    has 1, :site, :through => :visitor
-
-    validates_presence_of :visitor
+    def initialize(*args)
+      super
+      self.created_at ||= DateTime.now
+    end
   end
 
-  class Experiment
-    include DataMapper::Resource
+  class Experiment < Sequel::Model
+    include HasVisitor
     include Endable
+    many_to_one :visitor
 
-    property :id, Serial
-    property :label, String, :required => true
-    property :bucket, String, :required => true
-    property :created_at, DateTime
-    property :ended_at, DateTime
-
-    belongs_to :visitor
-    has 1, :site, :through => :visitor
-
-    validates_presence_of :visitor
+    def initialize(*args)
+      super
+      self.created_at ||= DateTime.now
+    end
   end
-
-  DataMapper.finalize
 end

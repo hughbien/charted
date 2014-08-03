@@ -5,12 +5,6 @@ class CommandTest < ChartedTest
     super
     @cmd = Charted::Command.new
     @cmd.config_loaded = true
-    Charted::Site.destroy
-    Charted::Visitor.destroy
-    Charted::Visit.destroy
-    Charted::Event.destroy
-    Charted::Conversion.destroy
-    Charted::Experiment.destroy
     Charted::Site.create(:domain => 'localhost')
     Charted::Site.create(:domain => 'example.org')
   end
@@ -33,10 +27,10 @@ class CommandTest < ChartedTest
 
   def test_clean
     site = Charted::Site.first(domain: 'localhost')
-    visitor = site.visitors.create
-    visitor.events.create(label: 'Label')
-    visitor.conversions.create(label: 'Label')
-    visitor.experiments.create(label: 'Label', bucket: 'A')
+    visitor = site.add_visitor({})
+    visitor.add_event(label: 'Label')
+    visitor.add_conversion(label: 'Label')
+    visitor.add_experiment(label: 'Label', bucket: 'A')
     @cmd.output = nil
     @cmd.clean
     visitor.reload

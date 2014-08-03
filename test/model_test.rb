@@ -1,15 +1,6 @@
 require_relative 'helper'
 
 class ModelTest < ChartedTest
-  def setup
-    Charted::Site.destroy
-    Charted::Visitor.destroy
-    Charted::Visit.destroy
-    Charted::Event.destroy
-    Charted::Conversion.destroy
-    Charted::Experiment.destroy
-  end
-
   def test_create
     site = Charted::Site.create(domain: 'localhost')
     visitor = Charted::Visitor.create(
@@ -25,7 +16,7 @@ class ModelTest < ChartedTest
       referrer: 'http://www.google.com?q=Charted+Test')
 
     assert_equal(site, visit.site)
-    assert_equal([visit], site.visits)
+    assert_equal([visit], visitor.visits)
     assert_equal('Charted Test', visit.search_terms)
     assert_match(/^\w{5}$/, visitor.secret)
     assert_equal("#{visitor.id}-#{visitor.bucket}-#{visitor.secret}", visitor.cookie)
@@ -51,6 +42,7 @@ class ModelTest < ChartedTest
     assert_equal('User Purchased', conversion.label)
     refute(conversion.ended?)
     visitor.end_goals('User Purchased')
+    conversion.refresh
     assert(conversion.ended?)
     visitor.end_goals('Nonexistant') # no effect
     assert_equal(2, visitor.conversions.length)
@@ -58,6 +50,7 @@ class ModelTest < ChartedTest
     experiment = visitor.start_experiments('User Next:A').first
     visitor.start_experiments('User Next:A') # no effect
     visitor.start_experiments('User Next:B') # changes bucket
+    experiment.refresh
     assert_equal(1, visitor.experiments.length)
     assert_equal(site, experiment.site)
     assert_equal(visitor, experiment.visitor)
@@ -65,6 +58,7 @@ class ModelTest < ChartedTest
     assert_equal('B', experiment.bucket)
     refute(experiment.ended?)
     visitor.end_goals('User Next')
+    experiment.refresh
     assert(experiment.ended?)
     visitor.end_goals('Nonexistant') # no effect
     assert_equal(1, visitor.experiments.length)

@@ -1,16 +1,16 @@
 var Charted = {
   URL: "/charted/",
-  RECORD_URL: "/charted/record",
+  RECORD_URL: URL + "record",
   send: function(url, queryString) {
     if (this.cookie("chartedignore")) { return; }
-    if (jQuery) {
-      jQuery.get(url, queryString);
-    } else {
+    if (typeof jQuery === 'undefined') {
       var script = document.createElement("script");
       script.type = "text/javascript";
       script.async = true;
       script.src = url + "?" + queryString;
       document.getElementsByTagName("head")[0].appendChild(script);
+    } else {
+      jQuery.get(url, queryString);
     }
   },
   cookie: function(name) {
