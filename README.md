@@ -130,17 +130,16 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* handle case where visitor visits "/charted" or any other route directly (bad input)
-* add ability to toggle bucket for local dev
-* add local dev fixtures
-* record/display uniques for pages, etc...
+* switch to Sequel and add /migrate directory
+* add timeout on charted requests
 * don't catch-all load error, makes debugging config.ru difficult
-* add --full or --single
-* browser version (IE6, IE7, IE8...) ?
 * handle 255 string length limit
-* plugin system
-* turn on/off plugin per site
-* --sync system to download data locally
+* make it CSRF-able w/ custom URL (inject <script> instead of AJAX GET/POST)
+* add better error email/re-raise
+* handle case where visitor visits "/charted" or any other route directly (bad input)
+* record/display uniques for pages, etc... perhaps --unique option
+* add --limit NUMBER to limit number of rows per table outputted
+* add date range options (--start "3 days ago" --end "1 day ago")
 
 License
 =======

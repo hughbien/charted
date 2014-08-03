@@ -1,4 +1,4 @@
-require File.expand_path('../lib/charted', File.dirname(__FILE__))
+require_relative '../lib/charted'
 require 'date'
 
 module Charted

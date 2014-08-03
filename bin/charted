@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 require 'optparse'
-require File.expand_path('lib/charted', File.dirname(__FILE__))
 require 'dm-migrations'
 require 'date'
 require 'fileutils'
+require_relative '../lib/charted'
 
 ENV['CHARTED_CMD'] = '1'
 

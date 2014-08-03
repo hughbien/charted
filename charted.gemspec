@@ -1,6 +1,8 @@
+require_relative 'lib/charted/version'
+
 Gem::Specification.new do |s|
   s.name        = 'charted'
-  s.version     = '0.0.9'
+  s.version     = Charted::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ['Hugh Bien']
   s.email       = ['hugh@hughbien.com']
@@ -17,11 +19,13 @@ Gem::Specification.new do |s|
   s.add_dependency 'search_terms'
   s.add_dependency 'dashes'
   s.add_development_dependency 'minitest'
+  s.add_development_dependency 'rack-test'
+  s.add_development_dependency 'dm-sqlite-adapter'
  
   s.files         = Dir.glob('*.{md,rb,ru,dat}') +
-                    %w(charted public/charted/script.js) +
-                    Dir.glob('{lib,test}/*.rb')
+                    %w(public/charted/script.js) +
+                    Dir.glob('{bin,lib,test}/**/*.rb')
   s.require_paths = ['lib']
-  s.bindir        = '.'
+  s.bindir        = 'bin'
   s.executables   = ['charted']
 end

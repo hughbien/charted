@@ -3,11 +3,15 @@ var Charted = {
   RECORD_URL: "/charted/record",
   send: function(url, queryString) {
     if (this.cookie("chartedignore")) { return; }
-    var script = document.createElement("script");
-    script.type = "text/javascript";
-    script.async = true;
-    script.src = url + "?" + queryString;
-    document.getElementsByTagName("head")[0].appendChild(script);
+    if (jQuery) {
+      jQuery.get(url, queryString);
+    } else {
+      var script = document.createElement("script");
+      script.type = "text/javascript";
+      script.async = true;
+      script.src = url + "?" + queryString;
+      document.getElementsByTagName("head")[0].appendChild(script);
+    }
   },
   cookie: function(name) {
     var obj = {};
@@ -63,7 +67,7 @@ var Charted = {
     var expQuery = "";
     var experiments = document.body.getAttribute("data-experiments");
     if (experiments) {
-      expQuery = "&experiments="
+      expQuery = "&experiments=";
       experiments = experiments.split(";");
       for (var i = 0; i < experiments.length; i++) {
         var experiment = experiments[i].split(":");
