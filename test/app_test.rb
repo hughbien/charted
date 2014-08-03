@@ -38,6 +38,19 @@ class AppTest < ChartedTest
     assert_equal(0, Charted::Visit.count)
   end
 
+  def test_error
+    raises_error = lambda { |*args| raise('Stubbed Error') }
+    Charted::Site.stub(:first, raises_error) do
+      assert_raises(RuntimeError) do
+        get '/charted', @params, @env
+      end
+    end
+    mail = Pony.last_mail
+    assert_equal('dev@localhost', mail[:to])
+    assert_equal('[Charted Error] Stubbed Error', mail[:subject])
+    assert(mail[:body])
+  end
+
   def test_new_visitor
     get '/charted', @params, @env
     assert(last_response.ok?)

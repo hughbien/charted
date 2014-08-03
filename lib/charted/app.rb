@@ -1,6 +1,8 @@
 module Charted
   class App < Sinatra::Base
     set :logging, true
+    set :raise_errors, false
+    set :show_exceptions, false
 
     before do
       @site = Site.first(domain: request.host)
@@ -45,12 +47,14 @@ module Charted
     end
 
     error do
+      err = request.env['sinatra.error']
       Pony.mail(
         to: Charted.config.email,
         from: "charted@#{Charted.config.email.split('@')[1..-1].join}",
-        subject: 'Charted Error',
-        body: request.env['sinatra.error'].to_s
-      ) if Charted.config.email && self.class.environment == :production
+        subject: "[Charted Error] #{err.message}",
+        body: [request.env.to_s, err.message, err.backtrace].compact.flatten.join("\n")
+      ) if Charted.config.email
+      raise err
     end
   end
 end

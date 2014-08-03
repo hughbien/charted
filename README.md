@@ -131,11 +131,10 @@ TODO
 ====
 
 * switch to Sequel and add /migrate directory
-* add timeout on charted requests
 * don't catch-all load error, makes debugging config.ru difficult
 * handle 255 string length limit
 * make it CSRF-able w/ custom URL (inject <script> instead of AJAX GET/POST)
-* add better error email/re-raise
+* add docs for using rack-timeout and rack-throttle
 * handle case where visitor visits "/charted" or any other route directly (bad input)
 * record/display uniques for pages, etc... perhaps --unique option
 * add --limit NUMBER to limit number of rows per table outputted

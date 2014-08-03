@@ -24,13 +24,14 @@ end
 class ChartedTest < Minitest::Test
   def setup
     Charted.configure(false) do |c|
-      c.email       'dev@localhost'
-      c.db_adapter  'sqlite3'
-      c.db_host     'localhost'
-      c.db_username 'root'
-      c.db_password 'secret'
-      c.db_database 'test.sqlite3'
-      c.sites       ['localhost']
+      c.delete_after 365
+      c.email        'dev@localhost'
+      c.db_adapter   'sqlite3'
+      c.db_host      'localhost'
+      c.db_username  'root'
+      c.db_password  'secret'
+      c.db_database  'test.sqlite3'
+      c.sites        ['localhost']
     end
     Pony.mail(nil)
   end
