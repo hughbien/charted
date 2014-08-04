@@ -1,10 +1,8 @@
-Description
-===========
+# Description
 
 Charted is a minimal web traffic analytics app.
 
-Installation
-============
+# Installation
 
     $ gem install charted
 
@@ -45,8 +43,7 @@ you other JavaScript assets.
 
     $ charted --js > /path/to/my/project/public/charted.js
 
-Updating
-========
+# Updating
 
     $ gem install charted
     
@@ -54,8 +51,7 @@ You may need to generate a `charted.js` file again:
 
     $ charted --js > /path/to/my/project/public/charted.js
 
-Usage
-=====
+# Usage
 
 The web application is for end users, to get information about your traffic use
 the included command line application.
@@ -110,8 +106,14 @@ events/conversions/experiments table:
 
     charted --clean "Buy Button"
 
-Development
-===========
+# Rack Extensions
+
+I recommend using these extensions with Charted:
+
+* [Rack Timeout](https://github.com/heroku/rack-timeout)
+* [Rack Throttle](https://github.com/datagraph/rack-throttle)
+
+# Development
 
 Put this in your `zshrc` or `bashrc`:
 
@@ -127,10 +129,8 @@ recordings should occur.
 
 Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 
-TODO
-====
+# TODO
 
-* add docs for using rack-timeout and rack-throttle
 * add config email options for error email
 * fix AppTest to not re-config when loading config.ru
 * handle case where visitor visits "/charted" or any other route directly (bad input)
@@ -138,8 +138,7 @@ TODO
 * add --limit NUMBER to limit number of rows per table outputted
 * add date range options (--start "3 days ago" --end "1 day ago")
 
-License
-=======
+# License
 
 `geoip.dat` is provided by MaxMind at <http://dev.maxmind.com/geoip/geolite>.
 
