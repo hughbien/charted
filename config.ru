@@ -11,7 +11,7 @@ Charted.configure do |c|
     password: 'secret',
     database: 'db.sqlite3')
   c.email_options(via: :sendmail)
-end
+end if ENV['RACK_ENV'] != 'test'
 
 if !ENV['CHARTED_CMD']
   map('/charted') { run Charted::App } 

@@ -136,7 +136,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 
 # TODO
 
-* fix AppTest to not re-config when loading config.ru
 * handle case where visitor visits "/charted" or any other route directly (bad input)
 * record/display uniques for pages, etc... perhaps --unique option
 * add --limit NUMBER to limit number of rows per table outputted
