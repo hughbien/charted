@@ -130,7 +130,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* switch to securerandom
 * add docs for using rack-timeout and rack-throttle
 * add config email options for error email
 * fix AppTest to not re-config when loading config.ru

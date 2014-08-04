@@ -18,7 +18,7 @@ class ModelTest < ChartedTest
     assert_equal(site, visit.site)
     assert_equal([visit], visitor.visits)
     assert_equal('Charted Test', visit.search_terms)
-    assert_match(/^\w{5}$/, visitor.secret)
+    assert_match(/^\w{6}$/, visitor.secret)
     assert_equal("#{visitor.id}-#{visitor.bucket}-#{visitor.secret}", visitor.cookie)
     assert_equal('Linux', visitor.platform)
     assert_equal('Firefox', visitor.browser)
@@ -62,10 +62,6 @@ class ModelTest < ChartedTest
     assert(experiment.ended?)
     visitor.end_goals('Nonexistant') # no effect
     assert_equal(1, visitor.experiments.length)
-  end
-
-  def test_unique_identifier
-    assert_match(/^\w{5}$/, Charted::Visitor.generate_secret)
   end
 
   def test_user_agents

@@ -52,7 +52,7 @@ module Charted
       super
       self.created_at ||= DateTime.now
       self.bucket ||= rand(10)
-      self.secret = self.class.generate_secret
+      self.secret = SecureRandom.hex(3)
     end
 
     def cookie
@@ -109,10 +109,6 @@ module Charted
         conv = conversions_dataset.first(label: label)
         conv.end! if conv
       end
-    end
-
-    def self.generate_secret
-      Digest::SHA1.hexdigest("#{Time.now}-#{rand(100)}")[0..4]
     end
   end
 
