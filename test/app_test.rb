@@ -32,6 +32,14 @@ class AppTest < ChartedTest
     assert_equal(0, Charted::Visit.count)
   end
 
+  def test_override_domain
+    site = Charted::Site.create(domain: 'chartedrb.com')
+    get '/charted', @params.merge(domain: 'chartedrb.com'), @env
+    assert(last_response.ok?)
+    assert_equal(1, Charted::Visitor.count)
+    assert_equal('chartedrb.com', Charted::Visitor.first.site.domain)
+  end
+
   def test_error
     raises_error = lambda { |*args| raise('Stubbed Error') }
     Charted::Site.stub(:first, raises_error) do

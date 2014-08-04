@@ -1,5 +1,6 @@
 ENV['RACK_ENV'] = 'test'
 
+require 'bundler/setup'
 require_relative '../lib/charted'
 require 'minitest/autorun'
 require 'rack'

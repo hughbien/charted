@@ -5,7 +5,7 @@ module Charted
     set :show_exceptions, false
 
     before do
-      @site = Site.first(domain: request.host)
+      @site = Site.first(domain: params[:domain] || request.host)
       halt(404) if @site.nil?
       @visitor = @site.visitor_with_cookie(request.cookies['charted'])
     end

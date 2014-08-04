@@ -1,4 +1,3 @@
-require 'bundler/setup'
 require 'dashes'
 require 'date'
 require 'geoip'

@@ -9,11 +9,14 @@ var Charted = {
       script.async = true;
       script.src = url + "?" + queryString;
       document.getElementsByTagName("head")[0].appendChild(script);
-    } else if (url.match(/^https?:\/\//)) {
+    } else if (this.external()) {
       jQuery.getScript(url + "?" + queryString);
     } else {
       jQuery.get(url, queryString);
     }
+  },
+  external: function() {
+    return !!this.URL.match(/^https?:\/\//);
   },
   cookie: function(name) {
     var obj = {};
@@ -61,6 +64,10 @@ var Charted = {
     var bucketNum = cookie ?
       parseInt(cookie.split("-")[1]) :
       Math.floor(Math.random() * 10);
+    var domainQuery = "";
+    if (this.external()) {
+      domainQuery = "&domain=" + encodeURIComponent(window.location.hostname);
+    }
     var convQuery = "";
     var conversions = document.body.getAttribute("data-conversions");
     if (conversions) {
@@ -90,7 +97,7 @@ var Charted = {
       "&referrer=" + encodeURIComponent(document.referrer) +
       "&resolution=" + encodeURIComponent(screen.width+"x"+screen.height) +
       "&bucket=" + bucketNum +
-      convQuery + expQuery);
+      domainQuery + convQuery + expQuery);
   }
 };
 Charted.init();
