@@ -1,7 +1,7 @@
 var Charted = {
   URL: "/charted/",
-  RECORD_URL: URL + "record",
-  send: function(url, queryString) {
+  send: function(path, queryString) {
+    var url = this.URL + path;
     if (this.cookie("chartedignore")) { return; }
     if (typeof jQuery === 'undefined') {
       var script = document.createElement("script");
@@ -50,14 +50,14 @@ var Charted = {
     for (var i = 0; i < arguments.length; i++) {
       str.push(arguments[i]);
     }
-    this.send(this.RECORD_URL, "events=" + encodeURIComponent(str.join(";")));
+    this.send("record", "events=" + encodeURIComponent(str.join(";")));
   },
   goals: function() {
     var str = [];
     for (var i = 0; i < arguments.length; i++) {
       str.push(arguments[i]);
     }
-    this.send(this.RECORD_URL, "goals=" + encodeURIComponent(str.join(";")));
+    this.send("record", "goals=" + encodeURIComponent(str.join(";")));
   },
   init: function() {
     var cookie = this.cookie("charted");
@@ -91,7 +91,7 @@ var Charted = {
       }
     }
     Charted.send(
-      Charted.URL,
+      "",
       "path=" + encodeURIComponent(window.location.pathname) +
       "&title=" + encodeURIComponent(document.title) +
       "&referrer=" + encodeURIComponent(document.referrer) +
