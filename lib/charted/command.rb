@@ -64,7 +64,7 @@ module Charted
         total = query.count
         query.group_and_count(field).each do |row|
           count = row[:count]
-          label = row[:label].to_s.strip
+          label = row[field].to_s.strip
           next if label == ""
           label = "#{label[0..37]}..." if label.length > 40
           rows << [format(count), "#{((count / total.to_f) * 100).round}%", label]
