@@ -8,10 +8,11 @@ require 'rack/server'
 require 'fileutils'
 
 Charted.configure do |c|
-  c.delete_after 365
-  c.email        'dev@localhost'
-  c.sites        ['localhost']
-  c.db_options   'sqlite::memory'
+  c.delete_after  365
+  c.error_email   'dev@localhost'
+  c.sites         ['localhost']
+  c.db_options    'sqlite::memory'
+  c.email_options(via: :sendmail)
 end
 Charted::Migrate.run
 

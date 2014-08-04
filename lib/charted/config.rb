@@ -4,6 +4,7 @@ module Charted
 
     def configure
       yield self.config
+      Pony.options = config.email_options if !config.email_options.nil?
       Charted.database = Sequel.connect(config.db_options)
       require_relative 'model'
     end
@@ -24,6 +25,6 @@ module Charted
       end
     end
 
-    attr_option :email, :db_options, :delete_after, :sites
+    attr_option :error_email, :email_options, :db_options, :delete_after, :sites
   end
 end

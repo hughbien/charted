@@ -16,14 +16,19 @@ Setup a `config.ru` file and run it like any other Sinatra application.
     require 'charted'
 
     Charted.configure do |c|
-      c.email        'john@mailinator.com'      # production exceptions are sent here
-      c.delete_after 365                        # only keep a years worth of data
-      c.db_adapter   'mysql'
-      c.db_host      'localhost'
-      c.db_username  'root'
-      c.db_password  'secret'
-      c.db_database  'charted'
+      c.delete_after 365                             # only keep a years worth of data
+      c.error_email  'john@mailinator.com'           # production exceptions are sent here
       c.sites        ['hughbien.com', 'example.com']
+      c.db_options(                                  # database config
+        adapter:     'postgres',
+        host:        'localhost',
+        username:    'root',
+        password:    'secret',
+        database:    'charted')
+      c.email_options(                               # error email config (see Pony gem for options)
+        from:        'errors@mailinator.com',
+        via:         :smtp,
+        via_options: {host: 'smtp.example.org'})
     end
 
     run Charted::App if !ENV['CHARTED_CMD']
@@ -131,7 +136,6 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 
 # TODO
 
-* add config email options for error email
 * fix AppTest to not re-config when loading config.ru
 * handle case where visitor visits "/charted" or any other route directly (bad input)
 * record/display uniques for pages, etc... perhaps --unique option

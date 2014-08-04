@@ -49,11 +49,10 @@ module Charted
     error do
       err = request.env['sinatra.error']
       Pony.mail(
-        to: Charted.config.email,
-        from: "charted@#{Charted.config.email.split('@')[1..-1].join}",
+        to: Charted.config.error_email,
         subject: "[Charted Error] #{err.message}",
         body: [request.env.to_s, err.message, err.backtrace].compact.flatten.join("\n")
-      ) if Charted.config.email
+      ) if Charted.config.error_email
       raise err
     end
   end
