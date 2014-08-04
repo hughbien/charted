@@ -9,6 +9,8 @@ var Charted = {
       script.async = true;
       script.src = url + "?" + queryString;
       document.getElementsByTagName("head")[0].appendChild(script);
+    } else if (url.match(/^https?:\/\//)) {
+      jQuery.getScript(url + "?" + queryString);
     } else {
       jQuery.get(url, queryString);
     }

@@ -130,11 +130,10 @@ Tests are setup to run via `ruby test/*_test.rb` or via `rake`.
 TODO
 ====
 
-* handle 255 string length limit
-* make it CSRF-able w/ custom URL (inject <script> instead of AJAX GET/POST)
 * switch to securerandom
 * add docs for using rack-timeout and rack-throttle
 * add config email options for error email
+* fix AppTest to not re-config when loading config.ru
 * handle case where visitor visits "/charted" or any other route directly (bad input)
 * record/display uniques for pages, etc... perhaps --unique option
 * add --limit NUMBER to limit number of rows per table outputted
